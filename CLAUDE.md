@@ -1,10 +1,10 @@
-# Threadlink
+# Threadlinking
 
 A CLI tool for creating durable, local-first links between AI conversations and the files they produce.
 
 ## For Claude Code: Context Preservation
 
-When working on significant files, use threadlink to preserve conversation context. This helps the user (and future Claude sessions) understand where files came from.
+When working on significant files, use threadlinking to preserve conversation context. This helps the user (and future Claude sessions) understand where files came from.
 
 ## Thread Detection and Prompting
 
@@ -24,7 +24,7 @@ for this? I'd suggest calling it 'myproject' - or you can name it something else
 ```
 
 **If a thread already exists for this project:**
-- Check with `threadlink list` to see existing threads
+- Check with `threadlinking list` to see existing threads
 - Ask: "Should this be part of the existing 'myproject' thread?"
 
 **Remember the current thread within a session.** Once the user confirms a thread name, use it for all context saves during that session without asking again.
@@ -41,12 +41,12 @@ Save a snippet when:
 
 ```bash
 # Add context for a file (auto-creates thread if needed)
-threadlink snippet PROJECT_NAME "Relevant excerpt explaining the why"
-threadlink attach PROJECT_NAME path/to/file
+threadlinking snippet PROJECT_NAME "Relevant excerpt explaining the why"
+threadlinking attach PROJECT_NAME path/to/file
 
 # Example workflow:
-threadlink snippet myproject "User wanted JWT instead of sessions for stateless API" --tags auth,decision
-threadlink attach myproject src/auth/jwt.ts
+threadlinking snippet myproject "User wanted JWT instead of sessions for stateless API" --tags auth,decision
+threadlinking attach myproject src/auth/jwt.ts
 ```
 
 ### Thread Naming
@@ -61,10 +61,10 @@ One thread can span months of work, dozens of files, and hundreds of snippets. U
 
 ```bash
 # Before modifying a file, check if it has context
-threadlink explain path/to/file
+threadlinking explain path/to/file
 
 # Search for related threads
-threadlink search "keyword"
+threadlinking search "keyword"
 ```
 
 ---
@@ -73,30 +73,30 @@ threadlink search "keyword"
 
 ### Core Operations
 ```bash
-threadlink snippet THREAD "content"   # Add context (auto-creates thread)
-threadlink attach THREAD path/to/file # Link file to thread
-threadlink detach THREAD path/to/file # Unlink file
-threadlink show THREAD                # View thread details
-threadlink list                       # List all threads
+threadlinking snippet THREAD "content"   # Add context (auto-creates thread)
+threadlinking attach THREAD path/to/file # Link file to thread
+threadlinking detach THREAD path/to/file # Unlink file
+threadlinking show THREAD                # View thread details
+threadlinking list                       # List all threads
 ```
 
 ### Looking Up Context
 ```bash
-threadlink explain path/to/file       # Why does this file exist?
-threadlink search "keyword"           # Search threads
+threadlinking explain path/to/file       # Why does this file exist?
+threadlinking search "keyword"           # Search threads
 ```
 
 ### Maintenance
 ```bash
-threadlink update THREAD --summary "new summary"
-threadlink rename OLD_ID NEW_ID
-threadlink delete THREAD
-threadlink audit                      # Check for broken links
+threadlinking update THREAD --summary "new summary"
+threadlinking rename OLD_ID NEW_ID
+threadlinking delete THREAD
+threadlinking audit                      # Check for broken links
 ```
 
 ## Data Storage
 
-Threads stored as JSON in `~/.threadlink/thread_index.json`:
+Threads stored as JSON in `~/.threadlinking/thread_index.json`:
 - Thread IDs (human-readable tags)
 - Snippets (conversation excerpts with source and timestamp)
 - Linked files (local paths)

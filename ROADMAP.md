@@ -1,4 +1,4 @@
-# Threadlink Roadmap
+# Threadlinking Roadmap
 
 ## Philosophy
 
@@ -25,12 +25,12 @@ The goal: When you ask "why did we build it this way?", the answer should be a c
 Snippets can be tagged for organization within a thread:
 
 ```bash
-threadlink snippet myproject "Chose JWT for stateless API" --tags auth,decision
-threadlink snippet myproject "Fixed token refresh bug" --tags auth,bugfix
+threadlinking snippet myproject "Chose JWT for stateless API" --tags auth,decision
+threadlinking snippet myproject "Fixed token refresh bug" --tags auth,bugfix
 
 # Filter by tag
-threadlink show myproject --tag decision
-threadlink show myproject --tag auth
+threadlinking show myproject --tag decision
+threadlinking show myproject --tag auth
 ```
 
 Suggested tag conventions:
@@ -43,10 +43,10 @@ Suggested tag conventions:
 
 ```bash
 # Set thread-level metadata
-threadlink update myproject --description "Main SaaS product development"
+threadlinking update myproject --description "Main SaaS product development"
 
 # See thread stats
-threadlink show myproject --stats
+threadlinking show myproject --stats
 # Output: 47 snippets, 23 files, last updated 2 days ago
 ```
 
@@ -59,7 +59,7 @@ threadlink show myproject --stats
 Instead of keyword matching, find context by meaning:
 
 ```bash
-threadlink search "why did we choose this architecture" --thread myproject
+threadlinking search "why did we choose this architecture" --thread myproject
 ```
 
 Uses embeddings to find the most relevant snippets, even if they don't contain the exact words.
@@ -74,7 +74,7 @@ Implementation options:
 Link related threads:
 
 ```bash
-threadlink link myproject client_acme
+threadlinking link myproject client_acme
 # Now context flows between them
 ```
 
@@ -83,13 +83,13 @@ threadlink link myproject client_acme
 Auto-generate summaries of long threads:
 
 ```bash
-threadlink summarize myproject
+threadlinking summarize myproject
 # Output: AI-generated summary of key decisions and evolution
 ```
 
 ### IDE Integration
 
-- VSCode extension: Right-click file → "Show Threadlink Context"
+- VSCode extension: Right-click file → "Show Threadlinking Context"
 - Hover on file in explorer → See linked threads
 
 ### MCP Server
@@ -98,7 +98,7 @@ Native Claude integration without CLI:
 
 ```typescript
 // Claude calls this directly
-threadlink_save_context({
+threadlinking_save_context({
   thread: "myproject",
   snippet: "User chose JWT for stateless API",
   files: ["src/auth/jwt.ts"],

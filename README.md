@@ -1,16 +1,16 @@
-# Threadlink
+# Threadlinking
 
 > Connect your files with their origin stories
 
-Threadlink is a Claude Code native tool for preserving conversation context alongside the files you create.
+Threadlinking is a Claude Code native tool for preserving conversation context alongside the files you create.
 
 You're working with Claude on a project. It creates files, makes design decisions, solves problems. A week later, you're looking at the code wondering:
 
 > "What was the context? What was I thinking?"
 
-Threadlink solves this. Claude automatically saves the relevant conversation snippets when creating files, so you can always trace back to the "why."
+Threadlinking solves this. Claude automatically saves the relevant conversation snippets when creating files, so you can always trace back to the "why."
 
-**The key insight:** A thread is a container for an **idea or project**, not a feature or task. One thread might span months of work, dozens of files, and hundreds of snippets across multiple repos. When you start a new Claude session next week, threadlink connects it back to the earlier conversations - preserving context across the gaps.
+**The key insight:** A thread is a container for an **idea or project**, not a feature or task. One thread might span months of work, dozens of files, and hundreds of snippets across multiple repos. When you start a new Claude session next week, threadlinking connects it back to the earlier conversations - preserving context across the gaps.
 
 ---
 
@@ -27,7 +27,7 @@ npm install -g threadlinking
 ```markdown
 ## Context Preservation
 
-Use threadlink to preserve context across sessions.
+Use threadlinking to preserve context across sessions.
 
 Proactively detect when work is thread-worthy:
 - User mentions working on a project by name
@@ -42,14 +42,14 @@ for this? I'd suggest calling it 'myproject' - or you can name it something else
 Once a thread is confirmed, remember it for the session and use it automatically.
 
 When creating significant files:
-- `threadlink snippet THREAD "why this was built this way"`
-- `threadlink attach THREAD path/to/file`
+- `threadlinking snippet THREAD "why this was built this way"`
+- `threadlinking attach THREAD path/to/file`
 
 Before modifying existing files, check for context:
-- `threadlink explain path/to/file`
+- `threadlinking explain path/to/file`
 
 To discover existing threads:
-- `threadlink list`
+- `threadlinking list`
 ```
 
 **3. That's it.** Claude detects thread-worthy work and prompts you to create threads.
@@ -67,8 +67,8 @@ Claude: "This looks like work worth preserving context for. Should I create
 You: "Call it auth_system"
 Claude: [remembers: current thread = auth_system]
 Claude: [creates src/auth/jwt.ts]
-Claude: [runs] threadlink snippet auth_system "Building JWT auth for stateless API"
-Claude: [runs] threadlink attach auth_system src/auth/jwt.ts
+Claude: [runs] threadlinking snippet auth_system "Building JWT auth for stateless API"
+Claude: [runs] threadlinking attach auth_system src/auth/jwt.ts
 ```
 
 Once you confirm a thread, Claude uses it automatically for the rest of the session.
@@ -77,7 +77,7 @@ Later, when you revisit the code (maybe weeks later, in a new session):
 
 ```
 You: "Why did we build auth this way?"
-Claude: [runs] threadlink explain src/auth/jwt.ts
+Claude: [runs] threadlinking explain src/auth/jwt.ts
 Claude: "You chose JWT over sessions because you wanted a stateless API..."
 ```
 
@@ -102,19 +102,19 @@ Threads persist across Claude sessions. One thread accumulates context over the 
 
 ```bash
 # Week 1: Starting the project
-threadlink snippet myproject "Building a SaaS for X. Starting with auth."
-threadlink attach myproject src/auth/jwt.ts
+threadlinking snippet myproject "Building a SaaS for X. Starting with auth."
+threadlinking attach myproject src/auth/jwt.ts
 
 # Week 3: New session, same thread
-threadlink snippet myproject "Added API layer. REST for simplicity."
-threadlink attach myproject src/api/routes.ts
+threadlinking snippet myproject "Added API layer. REST for simplicity."
+threadlinking attach myproject src/api/routes.ts
 
 # Month 2: Still the same thread
-threadlink snippet myproject "Pivoted to cursor pagination after scale issues"
-threadlink attach myproject src/api/pagination.ts
+threadlinking snippet myproject "Pivoted to cursor pagination after scale issues"
+threadlinking attach myproject src/api/pagination.ts
 ```
 
-One thread, many sessions, complete context. Works across repos too - the thread lives in `~/.threadlink/`, not in your project.
+One thread, many sessions, complete context. Works across repos too - the thread lives in `~/.threadlinking/`, not in your project.
 
 ---
 
@@ -149,7 +149,7 @@ Don't remember the name? Ask:
 
 ```
 You: "What threads do I have?"
-Claude: [runs] threadlink list
+Claude: [runs] threadlinking list
 Claude: "You have: myproject, research_llm, client_acme..."
 You: "This is part of myproject"
 ```
@@ -167,17 +167,17 @@ Claude: [uses myproject for the session]
 
 ## Manual Usage
 
-You can also use threadlink directly:
+You can also use threadlinking directly:
 
 ```bash
 # Save context
-threadlink snippet myproject "Decided on REST for simpler caching"
-threadlink attach myproject src/api/routes.ts
+threadlinking snippet myproject "Decided on REST for simpler caching"
+threadlinking attach myproject src/api/routes.ts
 
 # Find context
-threadlink explain src/api/routes.ts
-threadlink show myproject
-threadlink search "caching"
+threadlinking explain src/api/routes.ts
+threadlinking show myproject
+threadlinking search "caching"
 ```
 
 ---
@@ -200,7 +200,7 @@ threadlink search "caching"
 
 ## Data Storage
 
-Everything is stored locally at `~/.threadlink/thread_index.json`. No cloud, no sync, just a simple JSON file you control.
+Everything is stored locally at `~/.threadlinking/thread_index.json`. No cloud, no sync, just a simple JSON file you control.
 
 ---
 

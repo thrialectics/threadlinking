@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "threadlink": "./bin/threadlink"
+    "threadlinking": "./bin/threadlinking"
   },
   "scripts": {
     "build": "tsc",
@@ -23,7 +23,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/thrialectics/threadlink"
+    "url": "https://github.com/thrialectics/threadlinking"
   },
   "dependencies": {
     "commander": "^12.0.0"

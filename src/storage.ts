@@ -3,7 +3,7 @@ import { homedir } from 'os';
 import { join } from 'path';
 import type { ThreadIndex } from './types.js';
 
-const BASE_DIR = join(homedir(), '.threadlink');
+const BASE_DIR = join(homedir(), '.threadlinking');
 const INDEX_PATH = join(BASE_DIR, 'thread_index.json');
 
 export function loadIndex(): ThreadIndex {

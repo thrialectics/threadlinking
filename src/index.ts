@@ -16,7 +16,7 @@ import { clearCommand } from './commands/clear.js';
 const program = new Command();
 
 program
-  .name('threadlink')
+  .name('threadlinking')
   .description('Connect your files with their origin stories')
   .version('1.0.0');
 
