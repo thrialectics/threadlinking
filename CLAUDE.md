@@ -2,9 +2,18 @@
 
 A CLI tool for creating durable, local-first links between AI conversations and the files they produce.
 
-## For Claude Code: Context Preservation
+## Session Protocol (DO THIS)
 
-When working on significant files, use threadlinking to preserve conversation context. This helps the user (and future Claude sessions) understand where files came from.
+**Starting a session:**
+1. Run `threadlinking list` to see active project threads
+2. If working on a known project, remember the thread name for the session
+
+**During a session:**
+- Before modifying significant files: `threadlinking explain path/to/file`
+- When creating files or making decisions: `threadlinking snippet THREAD "why"`
+- Link files to threads: `threadlinking attach THREAD path/to/file`
+
+---
 
 ## Thread Detection and Prompting
 

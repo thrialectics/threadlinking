@@ -25,34 +25,45 @@ npm install -g threadlinking
 **2. Add to your global `~/.claude/CLAUDE.md`:**
 
 ```markdown
-## Context Preservation
+## Threadlinking (IMPORTANT)
 
-Use threadlinking to preserve context across sessions.
+**Threadlinking preserves conversation context across sessions.** Use it actively.
 
-Proactively detect when work is thread-worthy:
-- User mentions working on a project by name
-- Starting significant new work spanning multiple files
-- Making architectural decisions that should be remembered
+### Session Protocol
+
+**Starting a session:**
+1. Run `threadlinking list` to see active project threads
+
+**During a session:**
+- Before modifying significant files: `threadlinking explain path/to/file`
+- When creating files or making decisions: `threadlinking snippet THREAD "why"`
+
+### Detect Thread-Worthy Work
+
+Prompt the user when you see:
+- User mentions a project by name → "Should I track this as a thread?"
+- Significant new work spanning multiple files
+- Architectural decisions worth remembering
 - User asks to "remember this" or "save this context"
 
-When you detect thread-worthy work, prompt the user:
-"This looks like work worth preserving context for. Should I create a thread
-for this? I'd suggest calling it 'myproject' - or you can name it something else."
+**Prompt format:** "This looks like work worth preserving. Should I create a thread called 'projectname'?"
 
-Once a thread is confirmed, remember it for the session and use it automatically.
+Once confirmed, **remember the thread name for the session** and use it automatically.
 
-When creating significant files:
-- `threadlinking snippet THREAD "why this was built this way"`
-- `threadlinking attach THREAD path/to/file`
+### Commands
 
-Before modifying existing files, check for context:
-- `threadlinking explain path/to/file`
+threadlinking list                        # See all threads (DO THIS AT SESSION START)
+threadlinking explain path/to/file        # Check context before modifying
+threadlinking snippet THREAD "why"        # Save decision context
+threadlinking attach THREAD path/to/file  # Link file to thread
+threadlinking search "keyword"            # Find relevant threads
 
-To discover existing threads:
-- `threadlinking list`
+### Thread Naming
+
+Threads = projects, not tasks. Good: `myproject`, `client_acme`. Bad: `auth_v2`, `fix_bug_123`.
 ```
 
-**3. That's it.** Claude detects thread-worthy work and prompts you to create threads.
+**3. That's it.** Claude checks threads at session start and prompts you to preserve context as you work.
 
 ---
 
