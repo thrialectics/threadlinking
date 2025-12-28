@@ -19,7 +19,7 @@ Threadlink solves this. Claude automatically saves the relevant conversation sni
 **1. Install:**
 
 ```bash
-npm install -g threadlink
+npm install -g @thrialectics/threadlink
 ```
 
 **2. Add to your global `~/.claude/CLAUDE.md`:**

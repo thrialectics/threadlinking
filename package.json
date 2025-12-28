@@ -1,5 +1,5 @@
 {
-  "name": "threadlink",
+  "name": "@thrialectics/threadlink",
   "version": "1.0.0",
   "description": "Connect your files with their origin stories",
   "type": "module",
