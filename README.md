@@ -10,6 +10,8 @@ You're working with Claude on a project. It creates files, makes design decision
 
 Threadlink solves this. Claude automatically saves the relevant conversation snippets when creating files, so you can always trace back to the "why."
 
+**The key insight:** A thread is a container for an idea or project that spans multiple sessions and even multiple repos. When you start a new Claude session next week, threadlink connects it back to the earlier conversations - preserving context across the gaps.
+
 ---
 
 ## Quick Start
@@ -55,6 +57,24 @@ You: "Why did we build auth this way?"
 Claude: [runs] threadlink explain src/auth/jwt.ts
 Claude: "You chose JWT over sessions because you wanted a stateless API..."
 ```
+
+---
+
+## Cross-Session Context
+
+Threads persist across Claude sessions. Start a conversation today, pick it up next week:
+
+```bash
+# Session 1 (today): Working on auth
+threadlink snippet auth_v2 "Migrating from sessions to JWT for mobile support"
+threadlink attach auth_v2 src/auth/jwt.ts
+
+# Session 2 (next week): New Claude session, same thread
+threadlink snippet auth_v2 "Added refresh token rotation after security review"
+threadlink attach auth_v2 src/auth/refresh.ts
+```
+
+One thread, multiple sessions, complete context. Works across repos too - the thread lives in `~/.threadlink/`, not in your project.
 
 ---
 
