@@ -20,6 +20,7 @@ export const snippetCommand = new Command('snippet')
   .option('--source <source>', 'Source of snippet (claude-code, chatgpt, claude-desktop, manual)')
   .option('--url <url>', 'Optional URL to the conversation')
   .option('--summary <summary>', 'Summary for auto-created threads')
+  .option('--tags <tags>', 'Comma-separated tags (e.g., auth,decision)')
   .action((threadId: string, content: string | undefined, options) => {
     try {
       const index = loadIndex();
@@ -61,6 +62,17 @@ export const snippetCommand = new Command('snippet')
 
       if (options.url) {
         snippet.url = validateUrl(options.url);
+      }
+
+      // Parse and add tags
+      if (options.tags) {
+        const tags = options.tags
+          .split(',')
+          .map((t: string) => t.trim().toLowerCase())
+          .filter((t: string) => t.length > 0);
+        if (tags.length > 0) {
+          snippet.tags = tags;
+        }
       }
 
       // Auto-create thread if needed
@@ -108,7 +120,8 @@ export const snippetCommand = new Command('snippet')
 
       // Preview
       const preview = truncate(snippetContent, 100);
-      console.log(`   [${source}] ${preview}`);
+      const tagsDisplay = snippet.tags ? ` [${snippet.tags.join(', ')}]` : '';
+      console.log(`   [${source}]${tagsDisplay} ${preview}`);
     } catch (error) {
       console.error(`Error: ${error instanceof Error ? error.message : error}`);
     }

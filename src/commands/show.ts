@@ -6,6 +6,7 @@ export const showCommand = new Command('show')
   .description('Show thread details')
   .argument('<thread_id>', 'Thread tag or UUID')
   .option('--json', 'Output as JSON')
+  .option('--tag <tag>', 'Filter snippets by tag')
   .action((threadId: string, options) => {
     try {
       const index = loadIndex();
@@ -46,10 +47,20 @@ export const showCommand = new Command('show')
       }
 
       // Show snippets
-      const snippets = thread.snippets || [];
+      let snippets = thread.snippets || [];
+
+      // Filter by tag if specified
+      const filterTag = options.tag?.toLowerCase();
+      if (filterTag) {
+        snippets = snippets.filter((s) =>
+          s.tags?.some((t) => t.toLowerCase() === filterTag)
+        );
+      }
+
       if (snippets.length > 0) {
+        const filterNote = filterTag ? ` (filtered by: ${filterTag})` : '';
         console.log();
-        console.log(`  Snippets (${snippets.length}):`);
+        console.log(`  Snippets (${snippets.length})${filterNote}:`);
 
         snippets.forEach((s, i) => {
           const source = s.source || 'unknown';
@@ -57,15 +68,19 @@ export const showCommand = new Command('show')
           const content = s.content || '';
           const lines = content.split('\n');
           const preview = truncate(lines[0], 70);
+          const tagsDisplay = s.tags?.length ? ` [${s.tags.join(', ')}]` : '';
 
           console.log();
-          console.log(`  [${i + 1}] ${source} @ ${ts}`);
+          console.log(`  [${i + 1}] ${source} @ ${ts}${tagsDisplay}`);
           console.log(`      ${preview}`);
 
           if (s.url) {
             console.log(`      (${s.url})`);
           }
         });
+      } else if (filterTag) {
+        console.log();
+        console.log(`  No snippets with tag: ${filterTag}`);
       }
 
       // Show linked files

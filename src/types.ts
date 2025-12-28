@@ -3,6 +3,7 @@ export interface Snippet {
   source: string;
   url?: string;
   timestamp: string;
+  tags?: string[];
 }
 
 export interface Thread {
