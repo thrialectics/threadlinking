@@ -29,8 +29,17 @@ npm install -g threadlink
 
 Use threadlink to preserve context across sessions.
 
-When the user specifies a thread (e.g., "we're working on X"), remember it
-and use that thread name for all threadlink operations in this session.
+Proactively detect when work is thread-worthy:
+- User mentions working on a project by name
+- Starting significant new work spanning multiple files
+- Making architectural decisions that should be remembered
+- User asks to "remember this" or "save this context"
+
+When you detect thread-worthy work, prompt the user:
+"This looks like work worth preserving context for. Should I create a thread
+for this? I'd suggest calling it 'myproject' - or you can name it something else."
+
+Once a thread is confirmed, remember it for the session and use it automatically.
 
 When creating significant files:
 - `threadlink snippet THREAD "why this was built this way"`
@@ -43,20 +52,26 @@ To discover existing threads:
 - `threadlink list`
 ```
 
-**3. That's it.** Tell Claude what thread you're working on, and it handles the rest.
+**3. That's it.** Claude detects thread-worthy work and prompts you to create threads.
 
 ---
 
 ## How It Works
 
-When you're working with Claude and it creates a file:
+Claude automatically detects when you're doing work worth preserving and prompts you:
 
 ```
-You: "We're working on myproject. Let's use JWT instead of sessions for auth"
+You: "Let's build a new authentication system using JWT"
+Claude: "This looks like work worth preserving context for. Should I create
+        a thread for this? I'd suggest 'myproject' - or name it something else."
+You: "Call it auth_system"
+Claude: [remembers: current thread = auth_system]
 Claude: [creates src/auth/jwt.ts]
-Claude: [runs] threadlink snippet myproject "User chose JWT over sessions for stateless API"
-Claude: [runs] threadlink attach myproject src/auth/jwt.ts
+Claude: [runs] threadlink snippet auth_system "Building JWT auth for stateless API"
+Claude: [runs] threadlink attach auth_system src/auth/jwt.ts
 ```
+
+Once you confirm a thread, Claude uses it automatically for the rest of the session.
 
 Later, when you revisit the code (maybe weeks later, in a new session):
 
@@ -65,6 +80,19 @@ You: "Why did we build auth this way?"
 Claude: [runs] threadlink explain src/auth/jwt.ts
 Claude: "You chose JWT over sessions because you wanted a stateless API..."
 ```
+
+---
+
+## Automatic Thread Detection
+
+Claude looks for signals that work should be tracked:
+
+- **Project mentions:** "We're working on myproject" or "This is for client X"
+- **Significant new work:** Creating files that represent architectural decisions
+- **Explicit requests:** "Remember this" or "Save this context"
+- **Design discussions:** Making choices between approaches (REST vs GraphQL, etc.)
+
+When Claude detects these signals, it prompts you to create or use a thread. You stay in control - Claude asks, you confirm.
 
 ---
 

@@ -6,12 +6,36 @@ A CLI tool for creating durable, local-first links between AI conversations and 
 
 When working on significant files, use threadlink to preserve conversation context. This helps the user (and future Claude sessions) understand where files came from.
 
+## Thread Detection and Prompting
+
+**Proactively detect when a thread should be created.** Look for these signals:
+
+- User mentions working on a project by name ("working on myproject")
+- Starting significant new work that will span multiple files
+- Making architectural decisions that should be remembered
+- User asks to "remember this" or "save this context"
+- Creating files that represent important design choices
+
+**When you detect thread-worthy work, prompt the user:**
+
+```
+"This looks like work worth preserving context for. Should I create a thread
+for this? I'd suggest calling it 'myproject' - or you can name it something else."
+```
+
+**If a thread already exists for this project:**
+- Check with `threadlink list` to see existing threads
+- Ask: "Should this be part of the existing 'myproject' thread?"
+
+**Remember the current thread within a session.** Once the user confirms a thread name, use it for all context saves during that session without asking again.
+
 ### When to Save Context
 
 Save a snippet when:
 - Creating a new file that resulted from conversation decisions
 - Making significant changes based on discussion
 - The user asks you to remember why something was built a certain way
+- Making a design decision that future sessions should know about
 
 ### How to Save Context
 
@@ -21,16 +45,17 @@ threadlink snippet PROJECT_NAME "Relevant excerpt explaining the why"
 threadlink attach PROJECT_NAME path/to/file
 
 # Example workflow:
-threadlink snippet auth_redesign "User wanted JWT instead of sessions for stateless API" --source claude-code
-threadlink attach auth_redesign src/auth/jwt.py
+threadlink snippet myproject "User wanted JWT instead of sessions for stateless API" --tags auth,decision
+threadlink attach myproject src/auth/jwt.ts
 ```
 
 ### Thread Naming
 
-Propose descriptive thread names to the user:
-- Use lowercase with underscores: `auth_redesign`, `api_v2_migration`
-- Keep them short but meaningful
-- If user has a preference, use their name exactly
+Threads should be **project or idea level**, not task level:
+- Good: `myproject`, `saas_analytics`, `client_acme`
+- Avoid: `auth_v2`, `fix_bug_123`, `refactor_api`
+
+One thread can span months of work, dozens of files, and hundreds of snippets. Use tags (`--tags decision,auth`) to organize within a thread.
 
 ### Checking Existing Context
 
