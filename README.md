@@ -215,6 +215,16 @@ Everything is stored locally at `~/.threadlinking/thread_index.json`. No cloud, 
 
 ---
 
+## Security
+
+- All data stored locally at `~/.threadlinking/` with `0600` permissions (owner read/write only)
+- No network calls, no telemetry, no cloud sync
+- Single runtime dependency: [commander](https://www.npmjs.com/package/commander) (widely-used CLI framework)
+- Atomic file writes to prevent corruption
+- Input sanitization on all user-provided strings
+
+---
+
 ## Roadmap
 
 See [ROADMAP.md](./ROADMAP.md) for upcoming features:
