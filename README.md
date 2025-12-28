@@ -27,15 +27,23 @@ npm install -g threadlink
 ```markdown
 ## Context Preservation
 
-When creating significant files, save context with threadlink:
-- `threadlink snippet PROJECT_NAME "why this was built this way"`
-- `threadlink attach PROJECT_NAME path/to/file`
+Use threadlink to preserve context across sessions.
+
+When the user specifies a thread (e.g., "we're working on X"), remember it
+and use that thread name for all threadlink operations in this session.
+
+When creating significant files:
+- `threadlink snippet THREAD "why this was built this way"`
+- `threadlink attach THREAD path/to/file`
 
 Before modifying existing files, check for context:
 - `threadlink explain path/to/file`
+
+To discover existing threads:
+- `threadlink list`
 ```
 
-**3. That's it.** Claude will now automatically save context when working on your project.
+**3. That's it.** Tell Claude what thread you're working on, and it handles the rest.
 
 ---
 
@@ -75,6 +83,58 @@ threadlink attach auth_v2 src/auth/refresh.ts
 ```
 
 One thread, multiple sessions, complete context. Works across repos too - the thread lives in `~/.threadlink/`, not in your project.
+
+---
+
+## Working with Thread Names
+
+Thread names are like branch names - they need to be meaningful enough to find later. There are several ways to work with them:
+
+### Set the Current Thread
+
+Tell Claude what you're working on at the start of a session:
+
+```
+You: "We're continuing work on auth_v2 today"
+Claude: [remembers: current thread = auth_v2]
+Claude: [automatically uses auth_v2 for all context saves]
+```
+
+Add this to your CLAUDE.md to enable this pattern:
+
+```markdown
+When the user specifies a thread (e.g., "we're working on X"), use that
+thread name for all threadlink operations in this session.
+```
+
+### Claude Proposes, User Confirms
+
+Let Claude suggest names based on the work:
+
+```
+Claude: "I'll save this context. Thread name: auth_jwt_migration?"
+You: "Sure" / "Call it auth_v2 instead"
+```
+
+### Discovery First
+
+Don't remember the name? Ask:
+
+```
+You: "What threads do I have?"
+Claude: [runs] threadlink list
+Claude: "You have: auth_v2, api_redesign, mobile_app..."
+You: "Add this to auth_v2"
+```
+
+### User Names Explicitly
+
+Take control of the mental model upfront:
+
+```
+You: "Let's call this work 'auth_v2' - save context as we go"
+Claude: [uses auth_v2 for the session]
+```
 
 ---
 
