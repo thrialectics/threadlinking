@@ -22,7 +22,7 @@ Threadlink solves this. Claude automatically saves the relevant conversation sni
 npm install -g threadlink
 ```
 
-**2. Add to your project's CLAUDE.md:**
+**2. Add to your global `~/.claude/CLAUDE.md`:**
 
 ```markdown
 ## Context Preservation
@@ -132,12 +132,7 @@ Claude: [remembers: current thread = myproject]
 Claude: [automatically uses myproject for all context saves]
 ```
 
-Add this to your CLAUDE.md to enable this pattern:
-
-```markdown
-When the user specifies a thread (e.g., "we're working on X"), use that
-thread name for all threadlink operations in this session.
-```
+This works automatically with the global CLAUDE.md setup from Quick Start.
 
 ### Claude Proposes, User Confirms
 
