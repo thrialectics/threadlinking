@@ -44,7 +44,7 @@ export const listCommand = new Command('list')
       });
 
       if (entries.length === 0) {
-        console.log('No threads found.');
+        console.log('No threads yet. Create one with: threadlinking snippet <name> "context"');
       } else {
         entries.forEach(([id, thread]) => {
           const summary = truncate(thread.summary || '', 60);

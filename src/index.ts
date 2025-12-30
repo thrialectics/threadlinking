@@ -20,7 +20,7 @@ const program = new Command();
 program
   .name('threadlinking')
   .description('Connect your files with their origin stories')
-  .version('1.1.0');
+  .version('1.1.1');
 
 // Core commands
 program.addCommand(snippetCommand);
