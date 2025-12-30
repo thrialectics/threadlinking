@@ -16,54 +16,16 @@ Threadlinking solves this. Claude automatically saves the relevant conversation 
 
 ## Quick Start
 
-**1. Install:**
-
 ```bash
 npm install -g threadlinking
+threadlinking init
 ```
 
-**2. Add to your global `~/.claude/CLAUDE.md`:**
+That's it. The `init` command:
+- Installs a Claude Code hook that automatically tracks files you create/edit
+- Adds instructions to your `~/.claude/CLAUDE.md`
 
-```markdown
-## Threadlinking (IMPORTANT)
-
-**Threadlinking preserves conversation context across sessions.** Use it actively.
-
-### Session Protocol
-
-**Starting a session:**
-1. Run `threadlinking list` to see active project threads
-
-**During a session:**
-- Before modifying significant files: `threadlinking explain path/to/file`
-- When creating files or making decisions: `threadlinking snippet THREAD "why"`
-
-### Detect Thread-Worthy Work
-
-Prompt the user when you see:
-- User mentions a project by name → "Should I track this as a thread?"
-- Significant new work spanning multiple files
-- Architectural decisions worth remembering
-- User asks to "remember this" or "save this context"
-
-**Prompt format:** "This looks like work worth preserving. Should I create a thread called 'projectname'?"
-
-Once confirmed, **remember the thread name for the session** and use it automatically.
-
-### Commands
-
-threadlinking list                        # See all threads (DO THIS AT SESSION START)
-threadlinking explain path/to/file        # Check context before modifying
-threadlinking snippet THREAD "why"        # Save decision context
-threadlinking attach THREAD path/to/file  # Link file to thread
-threadlinking search "keyword"            # Find relevant threads
-
-### Thread Naming
-
-Threads = projects, not tasks. Good: `myproject`, `client_acme`. Bad: `auth_v2`, `fix_bug_123`.
-```
-
-**3. That's it.** Claude checks threads at session start and prompts you to preserve context as you work.
+Start a new Claude Code session and `threadlinking list` will show your threads plus any untracked files.
 
 ---
 
@@ -197,6 +159,8 @@ threadlinking search "caching"
 
 | Command | Description |
 |---------|-------------|
+| `init` | Set up hooks and CLAUDE.md (run once) |
+| `list` | List threads + untracked files |
 | `snippet THREAD "text"` | Add context (auto-creates thread) |
 | `snippet THREAD "text" --tags a,b` | Add context with tags |
 | `attach THREAD file` | Link file to thread |
@@ -204,8 +168,8 @@ threadlinking search "caching"
 | `show THREAD` | View thread with all snippets |
 | `show THREAD --tag decision` | Filter snippets by tag |
 | `search "query"` | Search across threads |
-| `list` | List all threads |
 | `audit` | Check for broken links |
+| `list --clear-pending` | Clear untracked files list |
 
 ---
 

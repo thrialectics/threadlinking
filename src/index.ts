@@ -12,13 +12,15 @@ import { updateCommand } from './commands/update.js';
 import { renameCommand } from './commands/rename.js';
 import { auditCommand } from './commands/audit.js';
 import { clearCommand } from './commands/clear.js';
+import { initCommand } from './commands/init.js';
+import { trackCommand } from './commands/track.js';
 
 const program = new Command();
 
 program
   .name('threadlinking')
   .description('Connect your files with their origin stories')
-  .version('1.0.3');
+  .version('1.1.0');
 
 // Core commands
 program.addCommand(snippetCommand);
@@ -35,5 +37,9 @@ program.addCommand(renameCommand);
 program.addCommand(deleteCommand);
 program.addCommand(auditCommand);
 program.addCommand(clearCommand);
+
+// Setup commands
+program.addCommand(initCommand);
+program.addCommand(trackCommand);
 
 program.parse();

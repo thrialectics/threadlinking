@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { existsSync } from 'fs';
-import { loadIndex, saveIndex } from '../storage.js';
+import { loadIndex, saveIndex, removeFromPending } from '../storage.js';
 import { validateTag, resolvePath } from '../utils.js';
 
 export const attachCommand = new Command('attach')
@@ -35,6 +35,10 @@ export const attachCommand = new Command('attach')
       index[validatedId].date_modified = new Date().toISOString();
 
       saveIndex(index);
+
+      // Remove from pending if it was tracked
+      removeFromPending(resolvedPath);
+
       console.log(`File '${resolvedPath}' attached to thread '${validatedId}'.`);
     } catch (error) {
       console.error(`Error: ${error instanceof Error ? error.message : error}`);
