@@ -5,8 +5,7 @@ tests/
 vitest.config.ts
 
 # Planning and internal docs
-claude connect integration planning/
-commands/
+/commands/
 Context.md
 
 # Plugin (published separately or bundled differently)
