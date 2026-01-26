@@ -14,6 +14,7 @@ const HOOK_CONFIG = {
     {
       type: 'command',
       command: "jq -r '.tool_input.file_path // empty' | xargs -I {} threadlinking track --quiet \"{}\"",
+      async: true,  // Don't block Claude - this is just logging
     },
   ],
 };
