@@ -1,0 +1,49 @@
+{
+  "name": "threadlinking",
+  "version": "2.0.2",
+  "description": "Connect your files with their origin stories",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "threadlinking": "./bin/threadlinking",
+    "threadlinking-mcp": "./bin/threadlinking-mcp"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "mcp": "node dist/mcp/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "cli",
+    "ai",
+    "context",
+    "claude",
+    "files",
+    "mcp",
+    "model-context-protocol"
+  ],
+  "author": "Marianne",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thrialectics/threadlinking"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@xenova/transformers": "^2.17.2",
+    "commander": "^12.0.0",
+    "vectra": "^0.12.3",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.18"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

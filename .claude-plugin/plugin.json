@@ -1,0 +1,9 @@
+{
+  "name": "threadlinking",
+  "description": "Preserve conversation context across sessions by linking files to their origin stories",
+  "version": "2.0.0",
+  "author": {
+    "name": "Marianne"
+  },
+  "repository": "https://github.com/thrialectics/threadlinking"
+}

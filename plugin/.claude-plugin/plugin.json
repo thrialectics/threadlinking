@@ -1,0 +1,19 @@
+{
+  "name": "threadlinking",
+  "version": "2.0.0",
+  "description": "Preserve AI conversation context across sessions. Connect files with their origin stories.",
+  "author": {
+    "name": "Marianne",
+    "url": "https://github.com/thrialectics"
+  },
+  "homepage": "https://github.com/thrialectics/threadlinking",
+  "repository": "https://github.com/thrialectics/threadlinking",
+  "license": "MIT",
+  "keywords": [
+    "context",
+    "memory",
+    "threads",
+    "documentation",
+    "knowledge-management"
+  ]
+}

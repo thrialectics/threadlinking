@@ -1,0 +1,35 @@
+# Development files
+.claude/
+.github/
+tests/
+vitest.config.ts
+
+# Planning and internal docs
+claude connect integration planning/
+commands/
+Context.md
+
+# Plugin (published separately or bundled differently)
+plugin/
+
+# Build artifacts not needed
+src/
+*.ts
+!*.d.ts
+
+# Editor and OS
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Misc
+*.log
+*.md
+!README.md
+!LICENSE

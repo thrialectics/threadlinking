@@ -1,0 +1,14 @@
+{
+  "name": "threadlinking-local",
+  "owner": {
+    "name": "Marianne"
+  },
+  "plugins": [
+    {
+      "name": "threadlinking",
+      "source": "..",
+      "version": "2.0.0",
+      "description": "Preserve conversation context across sessions by linking files to their origin stories"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "If significant work was completed this session (code changes, decisions made, problems solved), consider saving context to threadlinking. Ask the user: 'Would you like me to capture the context from this session to threadlinking?' If they agree, use threadlinking_snippet to save a summary of what was accomplished and why."
+          }
+        ]
+      }
+    ]
+  }
+}
