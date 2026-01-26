@@ -10,12 +10,12 @@ export const statusCommand = new Command('status')
     };
 
     if (options.json) {
-      console.log(JSON.stringify({ features, version: '2.0.0' }, null, 2));
+      console.log(JSON.stringify({ features, version: '2.0.4' }, null, 2));
       return;
     }
 
     console.log();
-    console.log('  Threadlinking v2.0.0');
+    console.log('  Threadlinking v2.0.4');
     console.log();
     console.log('  Available Features:');
     console.log();

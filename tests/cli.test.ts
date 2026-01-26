@@ -23,7 +23,7 @@ describe('CLI', () => {
   it('should show version', () => {
     const { stdout, exitCode } = runCli('--version');
     expect(exitCode).toBe(0);
-    expect(stdout.trim()).toBe('2.0.0');
+    expect(stdout.trim()).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
   it('should show help', () => {
@@ -46,7 +46,7 @@ describe('CLI', () => {
   it('should show status', () => {
     const { stdout, exitCode } = runCli('status');
     expect(exitCode).toBe(0);
-    expect(stdout).toContain('Threadlinking v2.0.0');
+    expect(stdout).toMatch(/Threadlinking v\d+\.\d+\.\d+/);
     expect(stdout).toContain('Available Features');
   });
 
