@@ -13,6 +13,8 @@ export {
   loadPending,
   savePending,
   removeFromPending,
+  updateIndex,
+  updatePending,
 } from './storage.js';
 
 // Utils

@@ -6,6 +6,7 @@ import type { OperationResult, Thread } from '../types.js';
 import { getEmbedder, stopEmbedder } from '../../embeddings/embedder.js';
 import {
   getSemanticIndex,
+  resetSemanticIndex,
   SemanticIndex,
   SemanticMetadata,
 } from '../../embeddings/index.js';
@@ -36,7 +37,7 @@ export async function semanticSearch(
 ): Promise<OperationResult<SemanticSearchResult>> {
   try {
     // Check if semantic index exists
-    const semanticIndex = await getSemanticIndex();
+    let semanticIndex = await getSemanticIndex();
     if (!(await semanticIndex.exists())) {
       return {
         success: false,
@@ -46,14 +47,21 @@ export async function semanticSearch(
       };
     }
 
-    // Check if index is stale
+    // Check if index is stale and reload if needed
     let staleWarning: string | undefined;
     const threadIndexPath = getIndexPath();
     if (fs.existsSync(threadIndexPath)) {
       const stats = fs.statSync(threadIndexPath);
       if (semanticIndex.isStale(stats.mtime)) {
-        staleWarning =
-          'Semantic index may be outdated. Run "threadlinking reindex" for best results.';
+        // Reset and reload the index to pick up disk changes
+        resetSemanticIndex();
+        semanticIndex = await getSemanticIndex();
+
+        // Still warn if thread_index.json is newer (suggests reindex needed)
+        if (semanticIndex.isStale(stats.mtime)) {
+          staleWarning =
+            'Semantic index may be outdated. Run "threadlinking reindex" for best results.';
+        }
       }
     }
 

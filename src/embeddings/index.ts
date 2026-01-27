@@ -247,6 +247,14 @@ export async function getSemanticIndex(): Promise<SemanticIndex> {
   return defaultIndex;
 }
 
+/**
+ * Reset the singleton index, forcing a fresh load on next access.
+ * Call this when the index may be stale (e.g., after detecting disk changes).
+ */
+export function resetSemanticIndex(): void {
+  defaultIndex = null;
+}
+
 export function getIndexPath(): string {
   return INDEX_DIR;
 }

@@ -1,7 +1,7 @@
 // Snippet operation - add context to a thread
 // Returns result object instead of console.log for MCP compatibility
 
-import { loadIndex, saveIndex } from '../storage.js';
+import { updateIndex } from '../storage.js';
 import {
   validateTag,
   validateUrl,
@@ -10,12 +10,11 @@ import {
   MAX_SNIPPET_LENGTH,
   MAX_SUMMARY_LENGTH,
 } from '../utils.js';
-import type { OperationResult, SnippetResult, SnippetInput, Snippet } from '../types.js';
+import type { OperationResult, SnippetResult, SnippetInput, Snippet, ThreadIndex } from '../types.js';
 import { indexSnippet } from './semantic.js';
 
 export async function addSnippet(input: SnippetInput): Promise<OperationResult<SnippetResult>> {
   try {
-    const index = loadIndex();
     const validatedId = validateTag(input.threadId);
 
     // Validate content
@@ -48,41 +47,48 @@ export async function addSnippet(input: SnippetInput): Promise<OperationResult<S
       snippet.tags = input.tags.map((t) => t.trim().toLowerCase()).filter((t) => t.length > 0);
     }
 
-    // Auto-create thread if needed
+    // Track result from inside the locked update
     let createdNew = false;
-    if (!index[validatedId]) {
-      let summary: string;
-      if (input.summary) {
-        summary = sanitizeString(input.summary, MAX_SUMMARY_LENGTH);
-      } else {
-        // Use first 80 chars of snippet as summary
-        const firstLine = snippetContent.split('\n')[0].slice(0, 80);
-        summary = firstLine.length < 10 ? snippetContent.slice(0, 80) : firstLine;
-        if (snippetContent.length > 80) summary += '...';
+    let snippetCount = 0;
+
+    // Use locked update to prevent race conditions
+    updateIndex((index: ThreadIndex) => {
+      // Auto-create thread if needed
+      if (!index[validatedId]) {
+        let summary: string;
+        if (input.summary) {
+          summary = sanitizeString(input.summary, MAX_SUMMARY_LENGTH);
+        } else {
+          // Use first 80 chars of snippet as summary
+          const firstLine = snippetContent.split('\n')[0].slice(0, 80);
+          summary = firstLine.length < 10 ? snippetContent.slice(0, 80) : firstLine;
+          if (snippetContent.length > 80) summary += '...';
+        }
+
+        index[validatedId] = {
+          summary,
+          snippets: [],
+          linked_files: [],
+          chat_url: '',
+          date_created: new Date().toISOString(),
+        };
+        createdNew = true;
       }
 
-      index[validatedId] = {
-        summary,
-        snippets: [],
-        linked_files: [],
-        chat_url: '',
-        date_created: new Date().toISOString(),
-      };
-      createdNew = true;
-    }
+      // Ensure snippets array exists (for old threads)
+      if (!index[validatedId].snippets) {
+        index[validatedId].snippets = [];
+      }
 
-    // Ensure snippets array exists (for old threads)
-    if (!index[validatedId].snippets) {
-      index[validatedId].snippets = [];
-    }
+      // Add snippet
+      index[validatedId].snippets.push(snippet);
+      index[validatedId].date_modified = new Date().toISOString();
 
-    // Add snippet
-    index[validatedId].snippets.push(snippet);
-    index[validatedId].date_modified = new Date().toISOString();
+      snippetCount = index[validatedId].snippets.length;
 
-    saveIndex(index);
+      return index;
+    });
 
-    const snippetCount = index[validatedId].snippets.length;
     const snippetIndex = snippetCount - 1;
 
     // Auto-update semantic index (best-effort, non-blocking)

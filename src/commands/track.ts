@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { existsSync } from 'fs';
-import { loadIndex, loadPending, savePending, resolvePath } from '../core/index.js';
+import { loadIndex, updatePending, resolvePath } from '../core/index.js';
 
 export const trackCommand = new Command('track')
   .description('Track a file for later context (called by hooks)')
@@ -16,6 +16,8 @@ export const trackCommand = new Command('track')
       }
 
       // Skip files already linked to a thread
+      // (Note: this read could be slightly stale, but worst case we track
+      // a file that's already linked - harmless, filtered out later)
       const index = loadIndex();
       const alreadyLinked = Object.values(index).some((thread) =>
         thread.linked_files?.includes(resolvedPath)
@@ -25,27 +27,30 @@ export const trackCommand = new Command('track')
         return;
       }
 
-      // Add or update in pending
-      const pending = loadPending();
+      // Add or update in pending with locking to prevent race conditions
       const now = new Date().toISOString();
+      let wasTracked = false;
 
-      const existing = pending.tracked.find((f) => f.path === resolvedPath);
+      updatePending((pending) => {
+        const existing = pending.tracked.find((f) => f.path === resolvedPath);
 
-      if (existing) {
-        existing.last_modified = now;
-        existing.count += 1;
-      } else {
-        pending.tracked.push({
-          path: resolvedPath,
-          first_seen: now,
-          last_modified: now,
-          count: 1,
-        });
-      }
+        if (existing) {
+          existing.last_modified = now;
+          existing.count += 1;
+        } else {
+          pending.tracked.push({
+            path: resolvedPath,
+            first_seen: now,
+            last_modified: now,
+            count: 1,
+          });
+        }
 
-      savePending(pending);
+        wasTracked = true;
+        return pending;
+      });
 
-      if (!options.quiet) {
+      if (!options.quiet && wasTracked) {
         console.log(`Tracked: ${resolvedPath}`);
       }
     } catch {

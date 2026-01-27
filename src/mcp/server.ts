@@ -18,13 +18,14 @@ import {
   getAnalytics,
   exportThread,
 } from '../core/index.js';
+import { VERSION } from '../version.js';
 
 // Create and configure the MCP server
 export function createServer(): McpServer {
   const server = new McpServer(
     {
       name: 'threadlinking',
-      version: '2.0.0',
+      version: VERSION,
     },
     {
       capabilities: {
@@ -362,7 +363,7 @@ Proactively save context when:
     {},
     async () => {
       const parts: string[] = [];
-      parts.push(`## Threadlinking v2.0.0`);
+      parts.push(`## Threadlinking v${VERSION}`);
       parts.push('');
       parts.push('## Available Features');
       parts.push('');

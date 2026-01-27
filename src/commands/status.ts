@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import { VERSION } from '../version.js';
 
 export const statusCommand = new Command('status')
   .description('Show available features')
@@ -10,12 +11,12 @@ export const statusCommand = new Command('status')
     };
 
     if (options.json) {
-      console.log(JSON.stringify({ features, version: '2.0.5' }, null, 2));
+      console.log(JSON.stringify({ features, version: VERSION }, null, 2));
       return;
     }
 
     console.log();
-    console.log('  Threadlinking v2.0.5');
+    console.log(`  Threadlinking v${VERSION}`);
     console.log();
     console.log('  Available Features:');
     console.log();

@@ -4,6 +4,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, renameSync, chmodSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
+import { lockSync, unlockSync } from 'proper-lockfile';
 import type { ThreadIndex } from './types.js';
 
 const BASE_DIR = join(homedir(), '.threadlinking');
@@ -118,4 +119,105 @@ export function removeFromPending(filePath: string): void {
   const state = loadPending();
   state.tracked = state.tracked.filter((f) => f.path !== filePath);
   savePending(state);
+}
+
+// Lock options for concurrent access
+// Note: sync API doesn't support retries, so we use stale detection
+const LOCK_OPTIONS = {
+  stale: 10000, // Consider lock stale after 10 seconds
+  update: 5000, // Update lock every 5 seconds to prevent stale
+};
+
+/**
+ * Ensure the base directory exists (needed for lockfile)
+ */
+function ensureBaseDir(): void {
+  if (!existsSync(BASE_DIR)) {
+    mkdirSync(BASE_DIR, { recursive: true, mode: 0o700 });
+  }
+}
+
+/**
+ * Ensure a file exists (needed for proper-lockfile)
+ */
+function ensureFileExists(filePath: string, defaultContent: string): void {
+  ensureBaseDir();
+  if (!existsSync(filePath)) {
+    writeFileSync(filePath, defaultContent, 'utf-8');
+    chmodSync(filePath, 0o600);
+  }
+}
+
+/**
+ * Atomically update the thread index with locking.
+ * Prevents race conditions between CLI and MCP server.
+ *
+ * @param updateFn - Function that receives current index and returns updated index
+ * @returns The updated index
+ */
+export function updateIndex(updateFn: (index: ThreadIndex) => ThreadIndex): ThreadIndex {
+  ensureFileExists(INDEX_PATH, '{}');
+
+  let release: (() => void) | null = null;
+  try {
+    // Acquire lock
+    release = lockSync(INDEX_PATH, LOCK_OPTIONS);
+
+    // Load FRESH data (not cached)
+    const index = loadIndex();
+
+    // Apply changes
+    const updated = updateFn(index);
+
+    // Save
+    saveIndex(updated);
+
+    return updated;
+  } finally {
+    // Release lock
+    if (release) {
+      try {
+        unlockSync(INDEX_PATH);
+      } catch {
+        // Ignore unlock errors (lock may have been released by stale check)
+      }
+    }
+  }
+}
+
+/**
+ * Atomically update the pending state with locking.
+ * Prevents race conditions between CLI and MCP server.
+ *
+ * @param updateFn - Function that receives current state and returns updated state
+ * @returns The updated state
+ */
+export function updatePending(updateFn: (state: PendingState) => PendingState): PendingState {
+  ensureFileExists(PENDING_PATH, '{"tracked":[]}');
+
+  let release: (() => void) | null = null;
+  try {
+    // Acquire lock
+    release = lockSync(PENDING_PATH, LOCK_OPTIONS);
+
+    // Load FRESH data (not cached)
+    const state = loadPending();
+
+    // Apply changes
+    const updated = updateFn(state);
+
+    // Save
+    savePending(updated);
+
+    return updated;
+  } finally {
+    // Release lock
+    if (release) {
+      try {
+        unlockSync(PENDING_PATH);
+      } catch {
+        // Ignore unlock errors
+      }
+    }
+  }
 }

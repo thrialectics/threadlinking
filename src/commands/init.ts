@@ -51,9 +51,23 @@ threadlinking list                        # See threads + untracked files
 threadlinking explain path/to/file        # Check context before modifying
 threadlinking snippet THREAD "why"        # Save decision context
 threadlinking attach THREAD path/to/file  # Link file to thread
-threadlinking search "keyword"            # Find relevant threads
-threadlinking semantic-search "query"     # Search by meaning (run reindex first)
 \`\`\`
+
+### Searching Context
+
+**Use semantic search for conceptual questions** (preferred when index exists):
+\`\`\`
+threadlinking semantic-search "why did we choose this architecture"
+threadlinking semantic-search "decisions about authentication"
+\`\`\`
+
+**Use keyword search for specific terms:**
+\`\`\`
+threadlinking search "PostgreSQL"
+threadlinking search "rate limiting"
+\`\`\`
+
+If semantic search returns "index not found", the user needs to run \`threadlinking reindex\` first.
 
 ### Thread Naming
 

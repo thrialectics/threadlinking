@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
+import { VERSION } from './version.js';
 import { snippetCommand } from './commands/snippet.js';
 import { createCommand } from './commands/create.js';
 import { attachCommand } from './commands/attach.js';
@@ -25,7 +26,7 @@ const program = new Command();
 program
   .name('threadlinking')
   .description('Connect your files with their origin stories')
-  .version('2.0.5');
+  .version(VERSION);
 
 // Core commands
 program.addCommand(snippetCommand);
