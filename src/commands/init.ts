@@ -20,8 +20,12 @@ const POST_TOOL_USE_HOOK_CONFIG = {
 };
 
 const SESSION_START_HOOK_CONFIG = {
-  type: 'command',
-  command: 'threadlinking context',
+  hooks: [
+    {
+      type: 'command',
+      command: 'threadlinking context',
+    },
+  ],
 };
 
 const MCP_SERVER_CONFIG = {
@@ -231,7 +235,7 @@ function installSessionStartHook(settings: Record<string, unknown>): boolean {
   }
 
   // Check if threadlinking hook already exists
-  const sessionStart = hooks.SessionStart as Array<{ command?: string }>;
+  const sessionStart = hooks.SessionStart as Array<{ hooks?: Array<{ command?: string }> }>;
   const existingHook = sessionStart.find(
     (h) => JSON.stringify(h).includes('threadlinking')
   );
