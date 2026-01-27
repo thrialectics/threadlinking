@@ -1,6 +1,6 @@
 {
   "name": "threadlinking",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "Connect your files with their origin stories",
   "type": "module",
   "main": "dist/index.js",
