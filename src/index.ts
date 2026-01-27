@@ -16,6 +16,7 @@ import { clearCommand } from './commands/clear.js';
 import { initCommand } from './commands/init.js';
 import { trackCommand } from './commands/track.js';
 import { statusCommand } from './commands/status.js';
+import { contextCommand } from './commands/context.js';
 import { reindexCommand } from './commands/reindex.js';
 import { semanticSearchCommand } from './commands/semantic-search.js';
 
@@ -49,6 +50,7 @@ program.addCommand(trackCommand);
 
 // Info commands
 program.addCommand(statusCommand);
+program.addCommand(contextCommand);
 
 // Advanced commands
 program.addCommand(reindexCommand);

@@ -8,7 +8,7 @@ const CLAUDE_DIR = join(homedir(), '.claude');
 const SETTINGS_PATH = join(CLAUDE_DIR, 'settings.json');
 const CLAUDE_MD_PATH = join(CLAUDE_DIR, 'CLAUDE.md');
 
-const HOOK_CONFIG = {
+const POST_TOOL_USE_HOOK_CONFIG = {
   matcher: 'Edit|Write',
   hooks: [
     {
@@ -17,6 +17,11 @@ const HOOK_CONFIG = {
       async: true,  // Don't block Claude - this is just logging
     },
   ],
+};
+
+const SESSION_START_HOOK_CONFIG = {
+  type: 'command',
+  command: 'threadlinking context',
 };
 
 const MCP_SERVER_CONFIG = {
@@ -58,7 +63,8 @@ Threads = projects, not tasks. Good: \`myproject\`, \`client_acme\`. Bad: \`auth
 interface SetupStatus {
   claudeCodeDetected: boolean;
   claudeDirExists: boolean;
-  hookInstalled: boolean;
+  postToolUseHookInstalled: boolean;
+  sessionStartHookInstalled: boolean;
   mcpConfigured: boolean;
   claudeMdPresent: boolean;
   settingsJsonValid: boolean;
@@ -97,13 +103,25 @@ function checkStatus(): SetupStatus {
 
   const { settings, valid: settingsJsonValid } = loadSettings();
 
-  // Check hook
-  let hookInstalled = false;
+  // Check PostToolUse hook
+  let postToolUseHookInstalled = false;
   if (settingsJsonValid && settings.hooks) {
     const hooks = settings.hooks as Record<string, unknown[]>;
     if (hooks.PostToolUse) {
       const postToolUse = hooks.PostToolUse as Array<{ matcher?: string }>;
-      hookInstalled = postToolUse.some(
+      postToolUseHookInstalled = postToolUse.some(
+        (h) => JSON.stringify(h).includes('threadlinking')
+      );
+    }
+  }
+
+  // Check SessionStart hook
+  let sessionStartHookInstalled = false;
+  if (settingsJsonValid && settings.hooks) {
+    const hooks = settings.hooks as Record<string, unknown[]>;
+    if (hooks.SessionStart) {
+      const sessionStart = hooks.SessionStart as Array<{ command?: string }>;
+      sessionStartHookInstalled = sessionStart.some(
         (h) => JSON.stringify(h).includes('threadlinking')
       );
     }
@@ -126,7 +144,8 @@ function checkStatus(): SetupStatus {
   return {
     claudeCodeDetected,
     claudeDirExists,
-    hookInstalled,
+    postToolUseHookInstalled,
+    sessionStartHookInstalled,
     mcpConfigured,
     claudeMdPresent,
     settingsJsonValid,
@@ -150,7 +169,7 @@ function backupAndFixSettings(): boolean {
   }
 }
 
-function installHook(settings: Record<string, unknown>): boolean {
+function installPostToolUseHook(settings: Record<string, unknown>): boolean {
   // Ensure ~/.claude exists
   if (!existsSync(CLAUDE_DIR)) {
     mkdirSync(CLAUDE_DIR, { recursive: true });
@@ -177,7 +196,38 @@ function installHook(settings: Record<string, unknown>): boolean {
   }
 
   // Add our hook
-  postToolUse.push(HOOK_CONFIG);
+  postToolUse.push(POST_TOOL_USE_HOOK_CONFIG);
+  return true;
+}
+
+function installSessionStartHook(settings: Record<string, unknown>): boolean {
+  // Ensure ~/.claude exists
+  if (!existsSync(CLAUDE_DIR)) {
+    mkdirSync(CLAUDE_DIR, { recursive: true });
+  }
+
+  // Initialize hooks structure if needed
+  if (!settings.hooks) {
+    settings.hooks = {};
+  }
+  const hooks = settings.hooks as Record<string, unknown[]>;
+
+  if (!hooks.SessionStart) {
+    hooks.SessionStart = [];
+  }
+
+  // Check if threadlinking hook already exists
+  const sessionStart = hooks.SessionStart as Array<{ command?: string }>;
+  const existingHook = sessionStart.find(
+    (h) => JSON.stringify(h).includes('threadlinking')
+  );
+
+  if (existingHook) {
+    return false; // Already installed
+  }
+
+  // Add our hook
+  sessionStart.push(SESSION_START_HOOK_CONFIG);
   return true;
 }
 
@@ -214,13 +264,14 @@ function installClaudeMd(): boolean {
 
 function printStatus(status: SetupStatus): void {
   console.log('\nThreadlinking setup status:\n');
-  console.log(`  Claude Code:     ${status.claudeCodeDetected ? '\u2713 Detected' : '\u2717 Not detected'}`);
-  console.log(`  PostToolUse hook: ${status.hookInstalled ? '\u2713 Installed' : '\u2717 Not installed'}`);
-  console.log(`  MCP server:       ${status.mcpConfigured ? '\u2713 Configured' : '\u2717 Not configured'}`);
-  console.log(`  CLAUDE.md:        ${status.claudeMdPresent ? '\u2713 Present' : '\u2717 Not present'}`);
+  console.log(`  Claude Code:        ${status.claudeCodeDetected ? '\u2713 Detected' : '\u2717 Not detected'}`);
+  console.log(`  PostToolUse hook:   ${status.postToolUseHookInstalled ? '\u2713 Installed' : '\u2717 Not installed'}`);
+  console.log(`  SessionStart hook:  ${status.sessionStartHookInstalled ? '\u2713 Installed' : '\u2717 Not installed'}`);
+  console.log(`  MCP server:         ${status.mcpConfigured ? '\u2713 Configured' : '\u2717 Not configured'}`);
+  console.log(`  CLAUDE.md:          ${status.claudeMdPresent ? '\u2713 Present' : '\u2717 Not present'}`);
 
   if (!status.settingsJsonValid && existsSync(SETTINGS_PATH)) {
-    console.log(`  settings.json:    \u2717 Invalid JSON`);
+    console.log(`  settings.json:      \u2717 Invalid JSON`);
   }
   console.log('');
 }
@@ -277,8 +328,8 @@ export const initCommand = new Command('init')
     }
 
     // Step 1: PostToolUse hook
-    console.log('[1/3] PostToolUse hook (auto-tracks files you create)');
-    if (status.hookInstalled) {
+    console.log('[1/4] PostToolUse hook (auto-tracks files you create)');
+    if (status.postToolUseHookInstalled) {
       console.log('      Status: Already installed');
       console.log('      \u2713 Skipping\n');
     } else {
@@ -289,7 +340,7 @@ export const initCommand = new Command('init')
         shouldInstall = answer !== 'n' && answer !== 'no';
       }
       if (shouldInstall) {
-        installHook(settings);
+        installPostToolUseHook(settings);
         writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), 'utf-8');
         console.log('      \u2713 Hook installed\n');
       } else {
@@ -298,13 +349,40 @@ export const initCommand = new Command('init')
     }
 
     // Reload settings in case they changed
-    const reloaded = loadSettings();
+    let reloaded = loadSettings();
     if (reloaded.valid) {
       settings = reloaded.settings;
     }
 
-    // Step 2: MCP Server
-    console.log('[2/3] MCP Server (gives Claude direct access to threadlinking tools)');
+    // Step 2: SessionStart hook
+    console.log('[2/4] SessionStart hook (shows context at session start)');
+    if (status.sessionStartHookInstalled) {
+      console.log('      Status: Already installed');
+      console.log('      \u2713 Skipping\n');
+    } else {
+      console.log('      Status: Not installed');
+      let shouldInstall = true;
+      if (options.interactive !== false) {
+        const answer = await ask('      Install to ~/.claude/settings.json? (Y/n) ');
+        shouldInstall = answer !== 'n' && answer !== 'no';
+      }
+      if (shouldInstall) {
+        installSessionStartHook(settings);
+        writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), 'utf-8');
+        console.log('      \u2713 Hook installed\n');
+      } else {
+        console.log('      Skipped\n');
+      }
+    }
+
+    // Reload settings in case they changed
+    reloaded = loadSettings();
+    if (reloaded.valid) {
+      settings = reloaded.settings;
+    }
+
+    // Step 3: MCP Server
+    console.log('[3/4] MCP Server (gives Claude direct access to threadlinking tools)');
     const mcpAlreadyConfigured = settings.mcpServers &&
       'threadlinking' in (settings.mcpServers as Record<string, unknown>);
 
@@ -327,8 +405,8 @@ export const initCommand = new Command('init')
       }
     }
 
-    // Step 3: CLAUDE.md
-    console.log('[3/3] CLAUDE.md instructions (teaches Claude when/how to use threadlinking)');
+    // Step 4: CLAUDE.md
+    console.log('[4/4] CLAUDE.md instructions (teaches Claude when/how to use threadlinking)');
     if (status.claudeMdPresent) {
       console.log('      Status: Already present');
       console.log('      \u2713 Skipping\n');
