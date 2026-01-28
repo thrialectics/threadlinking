@@ -13,7 +13,7 @@ const POST_TOOL_USE_HOOK_CONFIG = {
   hooks: [
     {
       type: 'command',
-      command: "jq -r '.tool_input.file_path // empty' | xargs -I {} threadlinking track --quiet \"{}\"",
+      command: "jq -r '.tool_input.file_path // empty' | while read -r f; do [ -n \"$f\" ] && npx threadlinking track --quiet \"$f\"; done",
       async: true,  // Don't block Claude - this is just logging
     },
   ],
@@ -23,7 +23,7 @@ const SESSION_START_HOOK_CONFIG = {
   hooks: [
     {
       type: 'command',
-      command: 'threadlinking context',
+      command: 'npx threadlinking context',
     },
   ],
 };
