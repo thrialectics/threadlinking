@@ -59,6 +59,8 @@ npx threadlinking init --status
 npx threadlinking init --no-interactive
 ```
 
+> **Note:** `npx` runs threadlinking without installing it globally. You'll need to use `npx threadlinking` for each command. If you prefer using `threadlinking` directly, run `npm install -g threadlinking` (see Global CLI install below).
+
 ### Manual Setup
 
 If you prefer to configure components individually:
@@ -78,10 +80,11 @@ If you prefer to configure components individually:
 }
 ```
 
-**Global CLI install:**
+**Global CLI install** (if you want `threadlinking` available as a direct command):
 ```bash
 npm install -g threadlinking
 ```
+After installing, restart your terminal. You can then use `threadlinking` directly instead of `npx threadlinking`.
 
 ### What Gets Installed
 
