@@ -16,13 +16,16 @@ Threadlinking solves this. Claude automatically saves the relevant conversation 
 
 ## Installation
 
-### Quick Start (Recommended)
+### Quick Start
+
+Install globally and run the guided setup:
 
 ```bash
-npx threadlinking init
+npm install -g threadlinking
+threadlinking init
 ```
 
-This runs a guided setup that configures everything:
+The global install is required because Threadlinking's hooks need `threadlinking` available as a command between sessions. The setup walks you through everything:
 
 ```
 Setting up threadlinking...
@@ -31,67 +34,86 @@ Checking environment...
   ✓ Claude Code detected
   ✓ ~/.claude directory exists
 
-[1/3] PostToolUse hook (auto-tracks files you create)
+[1/4] PostToolUse hook (auto-tracks files you create)
       Status: Not installed
-      Install to ~/.claude/settings.json? (Y/n)
+      Install to ~/.claude/settings.json? (Y/n) y
       ✓ Hook installed
 
-[2/3] MCP Server (gives Claude direct access to threadlinking tools)
+[2/4] SessionStart hook (shows context at session start)
+      Status: Not installed
+      Install to ~/.claude/settings.json? (Y/n) y
+      ✓ Hook installed
+
+[3/4] MCP Server (gives Claude direct access to threadlinking tools)
       Status: Not configured
-      Add to ~/.claude/settings.json mcpServers? (Y/n)
+      Add to ~/.claude/settings.json mcpServers? (Y/n) y
       ✓ MCP server configured
 
-[3/3] CLAUDE.md instructions (teaches Claude when/how to use threadlinking)
+[4/4] CLAUDE.md instructions (teaches Claude when/how to use threadlinking)
       Status: Not present
-      Append to ~/.claude/CLAUDE.md? (Y/n)
+      Append to ~/.claude/CLAUDE.md? (Y/n) y
       ✓ Instructions added
 
 Done! Threadlinking is fully configured.
+
+Start a new Claude Code session to begin.
+Tip: Run `threadlinking list` to see your threads.
 ```
 
 **Check your setup anytime:**
 ```bash
-npx threadlinking init --status
+threadlinking init --status
 ```
 
 **Non-interactive install (scripts/CI):**
 ```bash
-npx threadlinking init --no-interactive
+threadlinking init --no-interactive
 ```
 
-> **Note:** `npx` runs threadlinking without installing it globally. You'll need to use `npx threadlinking` for each command. If you prefer using `threadlinking` directly, run `npm install -g threadlinking` (see Global CLI install below).
+### Standalone CLI (No AI Integration)
+
+Threadlinking also works as a standalone CLI tool without any Claude/AI integration. If you just want to manually track context for your projects, skip the `init` and use it directly:
+
+```bash
+# Create a thread and add context
+threadlinking snippet myproject "Starting auth module with JWT"
+
+# Link files to threads
+threadlinking attach myproject src/auth/jwt.ts
+
+# Later, check why a file exists
+threadlinking explain src/auth/jwt.ts
+
+# See all your threads
+threadlinking list
+```
+
+See [Commands](#commands) for the full reference.
 
 ### Manual Setup
 
-If you prefer to configure components individually:
+If you prefer to configure components individually instead of using `init`:
 
 **MCP Server only** (Claude Desktop or Claude Code):
 
 ```json
-// ~/.claude/settings.json (Claude Code)
+// ~/.claude/mcp.json (Claude Code)
 // or ~/Library/Application Support/Claude/claude_desktop_config.json (Claude Desktop)
 {
   "mcpServers": {
     "threadlinking": {
-      "command": "npx",
-      "args": ["threadlinking-mcp"]
+      "command": "threadlinking-mcp"
     }
   }
 }
 ```
-
-**Global CLI install** (if you want `threadlinking` available as a direct command):
-```bash
-npm install -g threadlinking
-```
-After installing, restart your terminal. You can then use `threadlinking` directly instead of `npx threadlinking`.
 
 ### What Gets Installed
 
 | Component | Purpose | Location |
 |-----------|---------|----------|
 | PostToolUse hook | Auto-tracks files you create/edit | `~/.claude/settings.json` |
-| MCP Server | Gives Claude direct tool access | `~/.claude/settings.json` |
+| MCP Server | Gives Claude direct tool access | `~/.claude/mcp.json` |
 | CLAUDE.md block | Teaches Claude when/how to use threadlinking | `~/.claude/CLAUDE.md` |
 
 All components are optional and can be skipped during init.

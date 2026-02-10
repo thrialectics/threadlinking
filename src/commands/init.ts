@@ -6,6 +6,7 @@ import { createInterface } from 'readline';
 
 const CLAUDE_DIR = join(homedir(), '.claude');
 const SETTINGS_PATH = join(CLAUDE_DIR, 'settings.json');
+const MCP_JSON_PATH = join(CLAUDE_DIR, 'mcp.json');
 const CLAUDE_MD_PATH = join(CLAUDE_DIR, 'CLAUDE.md');
 
 const POST_TOOL_USE_HOOK_CONFIG = {
@@ -86,6 +87,7 @@ interface SetupStatus {
   mcpConfigured: boolean;
   claudeMdPresent: boolean;
   settingsJsonValid: boolean;
+  mcpJsonValid: boolean;
 }
 
 function ask(question: string): Promise<string> {
@@ -112,6 +114,19 @@ function loadSettings(): { settings: Record<string, unknown>; valid: boolean } {
     return { settings: JSON.parse(data), valid: true };
   } catch {
     return { settings: {}, valid: false };
+  }
+}
+
+function loadMcpJson(): { mcpJson: Record<string, unknown>; valid: boolean } {
+  if (!existsSync(MCP_JSON_PATH)) {
+    return { mcpJson: {}, valid: true };
+  }
+
+  try {
+    const data = readFileSync(MCP_JSON_PATH, 'utf-8');
+    return { mcpJson: JSON.parse(data), valid: true };
+  } catch {
+    return { mcpJson: {}, valid: false };
   }
 }
 
@@ -145,10 +160,11 @@ function checkStatus(): SetupStatus {
     }
   }
 
-  // Check MCP server
+  // Check MCP server (in mcp.json)
+  const { mcpJson, valid: mcpJsonValid } = loadMcpJson();
   let mcpConfigured = false;
-  if (settingsJsonValid && settings.mcpServers) {
-    const mcpServers = settings.mcpServers as Record<string, unknown>;
+  if (mcpJsonValid && mcpJson.mcpServers) {
+    const mcpServers = mcpJson.mcpServers as Record<string, unknown>;
     mcpConfigured = 'threadlinking' in mcpServers;
   }
 
@@ -167,6 +183,7 @@ function checkStatus(): SetupStatus {
     mcpConfigured,
     claudeMdPresent,
     settingsJsonValid,
+    mcpJsonValid,
   };
 }
 
@@ -249,12 +266,17 @@ function installSessionStartHook(settings: Record<string, unknown>): boolean {
   return true;
 }
 
-function installMcpServer(settings: Record<string, unknown>): boolean {
-  // Initialize mcpServers if needed
-  if (!settings.mcpServers) {
-    settings.mcpServers = {};
+function installMcpServer(mcpJson: Record<string, unknown>): boolean {
+  // Ensure ~/.claude exists
+  if (!existsSync(CLAUDE_DIR)) {
+    mkdirSync(CLAUDE_DIR, { recursive: true });
   }
-  const mcpServers = settings.mcpServers as Record<string, unknown>;
+
+  // Initialize mcpServers if needed
+  if (!mcpJson.mcpServers) {
+    mcpJson.mcpServers = {};
+  }
+  const mcpServers = mcpJson.mcpServers as Record<string, unknown>;
 
   // Check if already configured
   if ('threadlinking' in mcpServers) {
@@ -285,11 +307,14 @@ function printStatus(status: SetupStatus): void {
   console.log(`  Claude Code:        ${status.claudeCodeDetected ? '\u2713 Detected' : '\u2717 Not detected'}`);
   console.log(`  PostToolUse hook:   ${status.postToolUseHookInstalled ? '\u2713 Installed' : '\u2717 Not installed'}`);
   console.log(`  SessionStart hook:  ${status.sessionStartHookInstalled ? '\u2713 Installed' : '\u2717 Not installed'}`);
-  console.log(`  MCP server:         ${status.mcpConfigured ? '\u2713 Configured' : '\u2717 Not configured'}`);
+  console.log(`  MCP server:         ${status.mcpConfigured ? '\u2713 Configured (mcp.json)' : '\u2717 Not configured'}`);
   console.log(`  CLAUDE.md:          ${status.claudeMdPresent ? '\u2713 Present' : '\u2717 Not present'}`);
 
   if (!status.settingsJsonValid && existsSync(SETTINGS_PATH)) {
     console.log(`  settings.json:      \u2717 Invalid JSON`);
+  }
+  if (!status.mcpJsonValid && existsSync(MCP_JSON_PATH)) {
+    console.log(`  mcp.json:           \u2717 Invalid JSON`);
   }
   console.log('');
 }
@@ -393,33 +418,59 @@ export const initCommand = new Command('init')
       }
     }
 
-    // Reload settings in case they changed
-    reloaded = loadSettings();
-    if (reloaded.valid) {
-      settings = reloaded.settings;
+    // Step 3: MCP Server (uses separate mcp.json file)
+    console.log('[3/4] MCP Server (gives Claude direct access to threadlinking tools)');
+    let { mcpJson, valid: mcpJsonValid } = loadMcpJson();
+
+    // Handle invalid mcp.json
+    if (!mcpJsonValid && existsSync(MCP_JSON_PATH)) {
+      console.log('      \u26a0 mcp.json exists but is not valid JSON');
+      let shouldFix = true;
+      if (options.interactive !== false) {
+        const answer = await ask('      Back up and reset mcp.json? (Y/n) ');
+        shouldFix = answer !== 'n' && answer !== 'no';
+      }
+      if (shouldFix) {
+        const backupPath = `${MCP_JSON_PATH}.backup.${Date.now()}`;
+        try {
+          copyFileSync(MCP_JSON_PATH, backupPath);
+          console.log(`      Backed up to ${backupPath}`);
+          writeFileSync(MCP_JSON_PATH, '{}', 'utf-8');
+          mcpJson = {};
+          mcpJsonValid = true;
+          console.log('      \u2713 mcp.json reset');
+        } catch (error) {
+          console.error(`      Failed to backup: ${error instanceof Error ? error.message : error}`);
+          console.log('      Skipping MCP server setup\n');
+          mcpJsonValid = false;
+        }
+      } else {
+        console.log('      Skipping MCP server setup - please fix mcp.json manually\n');
+        mcpJsonValid = false;
+      }
     }
 
-    // Step 3: MCP Server
-    console.log('[3/4] MCP Server (gives Claude direct access to threadlinking tools)');
-    const mcpAlreadyConfigured = settings.mcpServers &&
-      'threadlinking' in (settings.mcpServers as Record<string, unknown>);
+    if (mcpJsonValid) {
+      const mcpAlreadyConfigured = mcpJson.mcpServers &&
+        'threadlinking' in (mcpJson.mcpServers as Record<string, unknown>);
 
-    if (mcpAlreadyConfigured) {
-      console.log('      Status: Already configured');
-      console.log('      \u2713 Skipping\n');
-    } else {
-      console.log('      Status: Not configured');
-      let shouldInstall = true;
-      if (options.interactive !== false) {
-        const answer = await ask('      Add to ~/.claude/settings.json mcpServers? (Y/n) ');
-        shouldInstall = answer !== 'n' && answer !== 'no';
-      }
-      if (shouldInstall) {
-        installMcpServer(settings);
-        writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), 'utf-8');
-        console.log('      \u2713 MCP server configured\n');
+      if (mcpAlreadyConfigured) {
+        console.log('      Status: Already configured');
+        console.log('      \u2713 Skipping\n');
       } else {
-        console.log('      Skipped\n');
+        console.log('      Status: Not configured');
+        let shouldInstall = true;
+        if (options.interactive !== false) {
+          const answer = await ask('      Add to ~/.claude/mcp.json? (Y/n) ');
+          shouldInstall = answer !== 'n' && answer !== 'no';
+        }
+        if (shouldInstall) {
+          installMcpServer(mcpJson);
+          writeFileSync(MCP_JSON_PATH, JSON.stringify(mcpJson, null, 2), 'utf-8');
+          console.log('      \u2713 MCP server configured\n');
+        } else {
+          console.log('      Skipped\n');
+        }
       }
     }
 
