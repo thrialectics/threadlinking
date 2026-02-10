@@ -53,6 +53,20 @@ The main blocker for wider adoption.
 - [ ] Submit to official MCP Registry
 - [ ] Add `mcp.json` manifest file
 - [ ] Create setup instructions for Claude Code users
+  - **Recommend `~/.claude/mcp.json`** (dedicated MCP config, not settings.json)
+  - Document the difference: mcp.json is for MCP servers only, settings.json mixes personal config
+  - Provide simple copy-paste config:
+    ```json
+    {
+      "mcpServers": {
+        "threadlinking": {
+          "command": "npx",
+          "args": ["threadlinking-mcp"]
+        }
+      }
+    }
+    ```
+  - Note: Users can also use settings.json → mcpServers if they prefer single-file config
 - [ ] List on directories: Smithery, Glama, MCP.so
 - [ ] Submit PR to awesome-mcp-servers
 
