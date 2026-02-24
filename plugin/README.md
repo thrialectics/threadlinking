@@ -41,10 +41,6 @@ claude --plugin-dir /path/to/threadlinking/plugin
 /thread-stats
 ```
 
-## Hooks (Automatic)
-
-- **SessionEnd**: Prompts to save context when ending a significant work session
-
 ## MCP Tools
 
 The plugin bundles the threadlinking MCP server with these tools:
