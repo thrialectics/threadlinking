@@ -29,7 +29,7 @@ describe('CLI', () => {
   it('should show help', () => {
     const { stdout, exitCode } = runCli('--help');
     expect(exitCode).toBe(0);
-    expect(stdout).toContain('Connect your files with their origin stories');
+    expect(stdout).toContain('Preserve the decisions behind your code');
     expect(stdout).toContain('Commands:');
   });
 

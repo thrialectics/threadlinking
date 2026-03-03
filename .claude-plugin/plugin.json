@@ -1,6 +1,6 @@
 {
   "name": "threadlinking",
-  "description": "Preserve conversation context across sessions by linking files to their origin stories",
+  "description": "Preserve decision-making context across sessions by linking files to the decisions behind them",
   "version": "2.0.0",
   "author": {
     "name": "Marianne"

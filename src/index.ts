@@ -25,7 +25,7 @@ const program = new Command();
 
 program
   .name('threadlinking')
-  .description('Connect your files with their origin stories')
+  .description('Preserve the decisions behind your code')
   .version(VERSION);
 
 // Core commands

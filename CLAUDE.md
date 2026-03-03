@@ -2,7 +2,7 @@
 
 Git tracks what changed. Threadlinking tracks **why**.
 
-A local-first tool for preserving AI conversation context alongside the files you create. When you return to code weeks later, threadlinking tells you the reasoning behind it.
+A local-first tool for preserving decision-making context alongside the files you create. When you return to code weeks later, threadlinking tells you the reasoning behind it.
 
 ---
 

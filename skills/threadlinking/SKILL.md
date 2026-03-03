@@ -1,16 +1,16 @@
 ---
 name: threadlinking
-description: Preserve conversation context across sessions by linking files to their origin stories
+description: Preserve decision-making context across sessions by linking files to the decisions behind them
 alwaysApply: false
 ---
 
 # threadlinking Skill
 
-You have access to threadlinking - a system for preserving context across sessions.
+You have access to threadlinking - a system for preserving decision-making context across sessions.
 
 ## Core Concept
 
-Every file has an origin story. Threadlinking captures *why* code exists, not just *what* it does. This context persists across sessions, so future conversations can understand past decisions.
+Every file has decisions behind it. Threadlinking captures *why* code exists, not just *what* it does. This context persists across sessions, so anyone returning to the code can understand the reasoning.
 
 ## When to Use Threadlinking
 
@@ -23,7 +23,7 @@ Every file has an origin story. Threadlinking captures *why* code exists, not ju
 
 ### Prompt the user when you detect thread-worthy work:
 
-> "This looks like work worth preserving. Should I save this context to a thread called 'projectname'?"
+> "This looks like a decision worth preserving. Should I save this context to a thread called 'projectname'?"
 
 Once confirmed, **remember the thread name for the session** and use it automatically.
 
@@ -89,5 +89,5 @@ When ending significant work:
 Users can also use these shortcuts:
 
 - `/threadlink <thread> "content" [file]` - Save and optionally attach
-- `/explain <file>` - Show file's origin story
+- `/explain <file>` - Show the decisions behind a file
 - `/context [thread]` - List threads or show details

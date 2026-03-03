@@ -1,6 +1,6 @@
 ---
 name: explain-file
-description: Show why a file exists - its origin story and the decisions that led to its creation.
+description: Show why a file exists — the decisions and reasoning that led to its creation.
 argument-hint: [file-path]
 user-invocable: true
 ---
