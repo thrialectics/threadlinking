@@ -37,7 +37,7 @@ const MCP_SERVER_CONFIG = {
 const CLAUDE_MD_BLOCK = `
 ## Threadlinking
 
-**Threadlinking preserves conversation context across sessions.** Use it actively.
+**Threadlinking preserves decision-making context across sessions.** Use it actively.
 
 ### Session Protocol
 

@@ -8,7 +8,7 @@
       "name": "threadlinking",
       "source": "..",
       "version": "2.0.0",
-      "description": "Preserve conversation context across sessions by linking files to their origin stories"
+      "description": "Preserve decision-making context across sessions by linking files to the decisions behind them"
     }
   ]
 }

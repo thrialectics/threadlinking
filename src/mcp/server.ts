@@ -31,16 +31,16 @@ export function createServer(): McpServer {
       capabilities: {
         tools: {},
       },
-      instructions: `threadlinking preserves AI conversation context across sessions.
+      instructions: `threadlinking preserves decision-making context across sessions.
 
 Key concepts:
 - **Threads**: Named containers for context (use project names, not task names)
 - **Snippets**: Context excerpts explaining decisions
-- **File links**: Connect files to their origin stories
+- **File links**: Connect files to the decisions behind them
 
 Proactively save context when:
-- Creating new files from conversation decisions
-- Making architectural choices
+- Making architectural choices or trade-off decisions
+- Creating new files based on design decisions
 - User asks to "remember why" something was done`,
     }
   );
@@ -167,7 +167,7 @@ Proactively save context when:
   // threadlinking_explain - Get context for a file
   server.tool(
     'threadlinking_explain',
-    'Show why a file exists - its origin story and the decisions that led to it.',
+    'Show why a file exists — the decisions and reasoning that led to it.',
     {
       file_path: z.string().describe('Path to the file to explain'),
     },

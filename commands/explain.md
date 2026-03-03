@@ -1,10 +1,10 @@
 ---
-description: Show why a file exists - its origin story from threadlinking
+description: Show why a file exists - the decisions behind it from threadlinking
 ---
 
 # /explain
 
-Show the origin story and context for a file.
+Show the decisions and reasoning behind a file.
 
 ## Usage
 

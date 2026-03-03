@@ -2,6 +2,6 @@
   "threadlinking": {
     "command": "npx",
     "args": ["threadlinking-mcp"],
-    "description": "Preserve AI conversation context across sessions"
+    "description": "Preserve decision-making context across sessions"
   }
 }

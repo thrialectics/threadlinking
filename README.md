@@ -1,16 +1,16 @@
 # Threadlinking
 
-> Connect your files with their origin stories
+> Preserve the decisions behind your code
 
-Threadlinking is a Claude Code native tool for preserving conversation context alongside the files you create.
+Threadlinking is a Claude Code native tool for preserving decision-making context alongside the files you create.
 
-You're working with Claude on a project. It creates files, makes design decisions, solves problems. A week later, you're looking at the code wondering:
+Your team is working on a project. Files get created, design decisions are made, problems get solved. A week later, someone's looking at the code wondering:
 
-> "What was the context? What was I thinking?"
+> "Why was it built this way? What were we thinking?"
 
-Threadlinking solves this. Claude automatically saves the relevant conversation snippets when creating files, so you can always trace back to the "why."
+Threadlinking solves this. It captures the reasoning behind decisions when creating files, so you can always trace back to the "why" — even across sessions, teammates, and repos.
 
-**The key insight:** A thread is a container for an **idea or project**, not a feature or task. One thread might span months of work, dozens of files, and hundreds of snippets across multiple repos. When you start a new Claude session next week, threadlinking connects it back to the earlier conversations - preserving context across the gaps.
+**The key insight:** A thread is a container for an **idea or project**, not a feature or task. One thread might span months of work, dozens of files, and hundreds of snippets across multiple repos. When someone starts a new session next week, threadlinking connects it back to the earlier decisions — preserving context across the gaps.
 
 ---
 
@@ -122,11 +122,11 @@ All components are optional and can be skipped during init.
 
 ## How It Works
 
-Claude automatically detects when you're doing work worth preserving and prompts you:
+Claude automatically detects when decisions are being made and prompts you:
 
 ```
 You: "Let's build a new authentication system using JWT"
-Claude: "This looks like work worth preserving context for. Should I create
+Claude: "This looks like a decision worth preserving. Should I create
         a thread for this? I'd suggest 'myproject' - or name it something else."
 You: "Call it auth_system"
 Claude: [remembers: current thread = auth_system]
@@ -137,7 +137,7 @@ Claude: [runs] threadlinking attach auth_system src/auth/jwt.ts
 
 Once you confirm a thread, Claude uses it automatically for the rest of the session.
 
-Later, when you revisit the code (maybe weeks later, in a new session):
+Later, when anyone revisits the code (maybe weeks later, in a new session):
 
 ```
 You: "Why did we build auth this way?"
@@ -149,20 +149,20 @@ Claude: "You chose JWT over sessions because you wanted a stateless API..."
 
 ## Automatic Thread Detection
 
-Claude looks for signals that work should be tracked:
+Claude looks for signals that decisions are being made:
 
 - **Project mentions:** "We're working on myproject" or "This is for client X"
-- **Significant new work:** Creating files that represent architectural decisions
+- **Architectural choices:** Creating files that represent design decisions
+- **Trade-off discussions:** Choosing between approaches (REST vs GraphQL, etc.)
 - **Explicit requests:** "Remember this" or "Save this context"
-- **Design discussions:** Making choices between approaches (REST vs GraphQL, etc.)
 
-When Claude detects these signals, it prompts you to create or use a thread. You stay in control - Claude asks, you confirm.
+When Claude detects these signals, it prompts you to create or use a thread. You stay in control — Claude asks, you confirm.
 
 ---
 
 ## Cross-Session Context
 
-Threads persist across Claude sessions. One thread accumulates context over the life of a project:
+Threads persist across sessions and teammates. One thread accumulates decision context over the life of a project:
 
 ```bash
 # Week 1: Starting the project
@@ -178,7 +178,7 @@ threadlinking snippet myproject "Pivoted to cursor pagination after scale issues
 threadlinking attach myproject src/api/pagination.ts
 ```
 
-One thread, many sessions, complete context. Works across repos too - the thread lives in `~/.threadlinking/`, not in your project.
+One thread, many sessions, complete decision history. Works across repos too — the thread lives in `~/.threadlinking/`, not in your project.
 
 ---
 
@@ -301,7 +301,7 @@ threadlinking export --format markdown myproject # Single thread
 
 ## Data Storage
 
-Everything is stored locally at `~/.threadlinking/thread_index.json`. No cloud, no sync, just a simple JSON file you control.
+Everything is stored locally at `~/.threadlinking/thread_index.json`. No cloud, no sync — just a simple JSON file your team controls.
 
 ---
 

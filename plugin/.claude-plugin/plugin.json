@@ -1,7 +1,7 @@
 {
   "name": "threadlinking",
   "version": "2.0.0",
-  "description": "Preserve AI conversation context across sessions. Connect files with their origin stories.",
+  "description": "Preserve decision-making context across sessions. Connect files to the decisions behind them.",
   "author": {
     "name": "Marianne",
     "url": "https://github.com/thrialectics"

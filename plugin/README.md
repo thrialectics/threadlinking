@@ -2,7 +2,7 @@
 
 Git tracks what changed. Threadlinking tracks **why**.
 
-Preserve AI conversation context across sessions. Connect files with their origin stories.
+Preserve decision-making context across sessions. Connect files to the decisions behind them.
 
 ## Installation
 
@@ -49,7 +49,7 @@ The plugin bundles the threadlinking MCP server with these tools:
 - `threadlinking_snippet` - Add context to a thread
 - `threadlinking_attach` - Link a file to a thread
 - `threadlinking_detach` - Unlink a file
-- `threadlinking_explain` - Show file's origin story
+- `threadlinking_explain` - Show the decisions behind a file
 - `threadlinking_show` - View thread details
 - `threadlinking_list` - List all threads
 - `threadlinking_search` - Keyword search
