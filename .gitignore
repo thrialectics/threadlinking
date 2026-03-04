@@ -7,3 +7,9 @@ Context.md
 CHANGELOG.md
 HANDOFF-*.md
 *.jpg
+*.tgz
+.env
+.env.*
+coverage/
+.vscode/
+.idea/
