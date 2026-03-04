@@ -10,6 +10,7 @@ export const detachCommand = new Command('detach')
 
     if (!result.success) {
       console.error(`Error: ${result.message}`);
+      process.exitCode = 1;
       return;
     }
 

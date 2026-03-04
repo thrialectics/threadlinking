@@ -2,17 +2,24 @@
 // Returns result object instead of console.log for MCP compatibility
 
 import { basename } from 'path';
-import { loadIndex, loadPending, savePending } from '../storage.js';
+import { loadMetaIndex, loadAllThreads, loadPending, updatePending } from '../storage.js';
 import { isIgnored } from '../ignore.js';
 import type { OperationResult, ListResult, ListOptions } from '../types.js';
 
 export function listThreads(options?: ListOptions): OperationResult<ListResult> {
   try {
-    const index = loadIndex();
+    // Use meta index for thread listing (fast - no need to read all thread files)
+    const meta = loadMetaIndex();
+
+    // For snippet/file counts, we need full thread data
+    // Only load full data if we need counts
+    const needCounts = true; // list always shows counts
+    const fullIndex = needCounts ? loadAllThreads() : {};
+
     const now = new Date();
 
     // Filter threads
-    const entries = Object.entries(index).filter(([id, thread]) => {
+    const entries = Object.entries(meta.threads).filter(([id, threadMeta]) => {
       // Filter by prefix
       if (options?.prefix && !id.startsWith(options.prefix)) {
         return false;
@@ -20,7 +27,7 @@ export function listThreads(options?: ListOptions): OperationResult<ListResult> 
 
       // Filter by age
       if (options?.since !== undefined) {
-        const ts = thread.date_modified || thread.date_created;
+        const ts = threadMeta.date_modified || threadMeta.date_created;
         if (ts) {
           const date = new Date(ts);
           const daysOld = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
@@ -34,13 +41,16 @@ export function listThreads(options?: ListOptions): OperationResult<ListResult> 
     });
 
     // Format thread data
-    const threads = entries.map(([id, thread]) => ({
-      id,
-      summary: thread.summary || '',
-      snippetCount: (thread.snippets || []).length,
-      fileCount: (thread.linked_files || []).length,
-      dateModified: thread.date_modified || thread.date_created,
-    }));
+    const threads = entries.map(([id, threadMeta]) => {
+      const fullThread = fullIndex[id];
+      return {
+        id,
+        summary: threadMeta.summary || '',
+        snippetCount: fullThread ? (fullThread.snippets || []).length : 0,
+        fileCount: fullThread ? (fullThread.linked_files || []).length : 0,
+        dateModified: threadMeta.date_modified || threadMeta.date_created,
+      };
+    });
 
     // Get pending files
     let pending: ListResult['pending'] = [];
@@ -49,7 +59,9 @@ export function listThreads(options?: ListOptions): OperationResult<ListResult> 
       const pendingState = loadPending();
 
       // Filter out files already linked to any thread
-      const allLinkedFiles = new Set(Object.values(index).flatMap((t) => t.linked_files || []));
+      const allLinkedFiles = new Set(
+        Object.values(fullIndex).flatMap((t) => t.linked_files || [])
+      );
 
       const untracked = pendingState.tracked
         .filter((f) => !allLinkedFiles.has(f.path))
@@ -92,7 +104,7 @@ export function listThreads(options?: ListOptions): OperationResult<ListResult> 
 
 export function clearPending(): OperationResult {
   try {
-    savePending({ tracked: [] });
+    updatePending(() => ({ tracked: [] }));
     return {
       success: true,
       message: 'Pending files cleared.',

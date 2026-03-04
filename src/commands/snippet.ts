@@ -19,12 +19,14 @@ export const snippetCommand = new Command('snippet')
         snippetContent = readFileSync(options.file, 'utf-8');
       } catch (error) {
         console.error(`Error reading file: ${error}`);
+        process.exitCode = 1;
         return;
       }
     } else if (content) {
       snippetContent = content;
     } else {
       console.error('Snippet content cannot be empty');
+      process.exitCode = 1;
       return;
     }
 
@@ -43,6 +45,7 @@ export const snippetCommand = new Command('snippet')
 
     if (!result.success) {
       console.error(`Error: ${result.message}`);
+      process.exitCode = 1;
       return;
     }
 

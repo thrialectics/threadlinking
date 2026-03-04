@@ -10,11 +10,28 @@ export {
   saveIndex,
   getIndexPath,
   getBaseDir,
+  getThreadsDir,
   loadPending,
   savePending,
   removeFromPending,
   updateIndex,
   updatePending,
+  loadMetaIndex,
+  updateMetaIndex,
+  loadThread,
+  saveThread,
+  updateThread,
+  deleteThreadFile,
+  loadAllThreads,
+  ensureMigrated,
+  resetMigrationState,
+} from './storage.js';
+
+export type {
+  ThreadMeta,
+  MetaIndex,
+  PendingFile,
+  PendingState,
 } from './storage.js';
 
 // Utils

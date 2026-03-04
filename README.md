@@ -34,25 +34,30 @@ Checking environment...
   ✓ Claude Code detected
   ✓ ~/.claude directory exists
 
-[1/4] PostToolUse hook (auto-tracks files you create)
+[1/5] PostToolUse hook (auto-tracks files you create)
       Status: Not installed
       Install to ~/.claude/settings.json? (Y/n) y
       ✓ Hook installed
 
-[2/4] SessionStart hook (shows context at session start)
+[2/5] SessionStart hook (shows context at session start)
       Status: Not installed
       Install to ~/.claude/settings.json? (Y/n) y
       ✓ Hook installed
 
-[3/4] MCP Server (gives Claude direct access to threadlinking tools)
+[3/5] MCP Server (gives Claude direct access to threadlinking tools)
       Status: Not configured
-      Add to ~/.claude/settings.json mcpServers? (Y/n) y
+      Add to ~/.claude/mcp.json? (Y/n) y
       ✓ MCP server configured
 
-[4/4] CLAUDE.md instructions (teaches Claude when/how to use threadlinking)
+[4/5] CLAUDE.md instructions (teaches Claude when/how to use threadlinking)
       Status: Not present
       Append to ~/.claude/CLAUDE.md? (Y/n) y
       ✓ Instructions added
+
+[5/5] Ignore file (filters noise from pending files list)
+      Status: Not present
+      Create ~/.threadlinkingignore? (Y/n) y
+      ✓ Ignore file created
 
 Done! Threadlinking is fully configured.
 
@@ -310,7 +315,7 @@ Everything is stored locally at `~/.threadlinking/thread_index.json`. No cloud, 
 
 - All data stored locally at `~/.threadlinking/` with `0600` permissions (owner read/write only)
 - No network calls, no telemetry, no cloud sync (model download is one-time and cached)
-- Minimal dependencies: [commander](https://www.npmjs.com/package/commander), [@xenova/transformers](https://github.com/xenova/transformers.js), [vectra](https://github.com/Stevenic/vectra)
+- Focused dependencies: [commander](https://www.npmjs.com/package/commander), [@xenova/transformers](https://github.com/xenova/transformers.js), [vectra](https://github.com/Stevenic/vectra), [zod](https://github.com/colinhacks/zod), [proper-lockfile](https://github.com/moxystudio/node-proper-lockfile), [ignore](https://github.com/kaelzhang/node-ignore), [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/sdk)
 - Atomic file writes to prevent corruption
 - Input sanitization on all user-provided strings
 

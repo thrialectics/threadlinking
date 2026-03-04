@@ -1,9 +1,9 @@
 // Create operation - create a new empty thread
 // Returns result object for MCP compatibility
 
-import { loadIndex, saveIndex } from '../storage.js';
+import { loadMetaIndex, saveThread } from '../storage.js';
 import { validateTag, sanitizeString } from '../utils.js';
-import type { OperationResult } from '../types.js';
+import type { OperationResult, Thread } from '../types.js';
 
 export interface CreateInput {
   threadId: string;
@@ -18,11 +18,11 @@ export interface CreateResult {
 
 export function createThread(input: CreateInput): OperationResult<CreateResult> {
   try {
-    const index = loadIndex();
     const validatedId = validateTag(input.threadId);
 
-    // Check if thread already exists
-    if (index[validatedId]) {
+    // Check if thread already exists via meta index (fast)
+    const meta = loadMetaIndex();
+    if (meta.threads[validatedId]) {
       return {
         success: false,
         message: `Thread '${validatedId}' already exists.`,
@@ -39,8 +39,8 @@ export function createThread(input: CreateInput): OperationResult<CreateResult> 
       ? sanitizeString(input.chatUrl).slice(0, 1000)
       : '';
 
-    // Create minimal thread
-    index[validatedId] = {
+    // Create thread
+    const thread: Thread = {
       summary,
       snippets: [],
       linked_files: [],
@@ -48,7 +48,7 @@ export function createThread(input: CreateInput): OperationResult<CreateResult> 
       date_created: new Date().toISOString(),
     };
 
-    saveIndex(index);
+    saveThread(validatedId, thread);
 
     return {
       success: true,

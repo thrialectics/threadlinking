@@ -1,16 +1,18 @@
 // Show operation - display thread details
 // Returns result object instead of console.log for MCP compatibility
 
-import { loadIndex } from '../storage.js';
+import { loadThread } from '../storage.js';
 import { validateTag } from '../utils.js';
 import type { OperationResult, ShowResult, ShowOptions, Thread } from '../types.js';
 
 export function showThread(threadId: string, options?: ShowOptions): OperationResult<ShowResult> {
   try {
-    const index = loadIndex();
     const validatedId = validateTag(threadId);
 
-    if (!index[validatedId]) {
+    // Load single thread (fast - no need to read all threads)
+    const thread = loadThread(validatedId);
+
+    if (!thread) {
       return {
         success: false,
         message: `Thread ID '${validatedId}' not found.`,
@@ -18,12 +20,12 @@ export function showThread(threadId: string, options?: ShowOptions): OperationRe
       };
     }
 
-    const thread = { ...index[validatedId] };
+    const result = { ...thread };
 
     // Filter snippets by tag if specified
     if (options?.filterTag) {
       const filterTag = options.filterTag.toLowerCase();
-      thread.snippets = (thread.snippets || []).filter((s) =>
+      result.snippets = (result.snippets || []).filter((s) =>
         s.tags?.some((t) => t.toLowerCase() === filterTag)
       );
     }
@@ -33,7 +35,7 @@ export function showThread(threadId: string, options?: ShowOptions): OperationRe
       message: `Thread '${validatedId}' retrieved.`,
       data: {
         threadId: validatedId,
-        thread,
+        thread: result,
       },
     };
   } catch (error) {
@@ -47,9 +49,8 @@ export function showThread(threadId: string, options?: ShowOptions): OperationRe
 
 export function getThread(threadId: string): Thread | null {
   try {
-    const index = loadIndex();
     const validatedId = validateTag(threadId);
-    return index[validatedId] || null;
+    return loadThread(validatedId);
   } catch {
     return null;
   }

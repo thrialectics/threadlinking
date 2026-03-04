@@ -81,5 +81,6 @@ export const auditCommand = new Command('audit')
       console.log(`Duplicates: ${actualDuplicates.size}`);
     } catch (error) {
       console.error(`Error: ${error instanceof Error ? error.message : error}`);
+      process.exitCode = 1;
     }
   });

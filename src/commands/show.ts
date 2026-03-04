@@ -11,6 +11,7 @@ export const showCommand = new Command('show')
 
     if (!result.success) {
       console.error(`Error: ${result.message}`);
+      process.exitCode = 1;
       return;
     }
 

@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import {
-  loadIndex,
-  saveIndex,
+  updateThread,
+  loadMetaIndex,
   validateTag,
   validateUrl,
   sanitizeString,
@@ -17,30 +17,36 @@ export const updateCommand = new Command('update')
     try {
       if (!options.summary && options.chat_url === undefined) {
         console.error('Nothing to update. Provide --summary and/or --chat_url');
+        process.exitCode = 1;
         return;
       }
 
-      const index = loadIndex();
       const validatedId = validateTag(threadId);
 
-      if (!index[validatedId]) {
+      // Check existence via meta index (fast)
+      const meta = loadMetaIndex();
+      if (!meta.threads[validatedId]) {
         console.error(`Thread ID '${validatedId}' not found.`);
+        process.exitCode = 1;
         return;
       }
 
-      if (options.summary) {
-        index[validatedId].summary = sanitizeString(options.summary, MAX_SUMMARY_LENGTH);
-      }
+      updateThread(validatedId, (thread) => {
+        if (options.summary) {
+          thread.summary = sanitizeString(options.summary, MAX_SUMMARY_LENGTH);
+        }
 
-      if (options.chat_url !== undefined) {
-        index[validatedId].chat_url = validateUrl(options.chat_url);
-      }
+        if (options.chat_url !== undefined) {
+          thread.chat_url = validateUrl(options.chat_url);
+        }
 
-      index[validatedId].date_modified = new Date().toISOString();
+        thread.date_modified = new Date().toISOString();
+        return thread;
+      });
 
-      saveIndex(index);
       console.log('Thread updated.');
     } catch (error) {
       console.error(`Error: ${error instanceof Error ? error.message : error}`);
+      process.exitCode = 1;
     }
   });

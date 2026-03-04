@@ -1,32 +1,20 @@
 import { Command } from 'commander';
-import { createInterface } from 'readline';
-import { loadIndex, saveIndex, validateTag } from '../core/index.js';
-
-function prompt(question: string): Promise<string> {
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer);
-    });
-  });
-}
+import { deleteThreadFile, loadMetaIndex, validateTag, prompt } from '../core/index.js';
+import { getSemanticIndex } from '../embeddings/index.js';
 
 export const deleteCommand = new Command('delete')
   .description('Delete a thread')
   .argument('<thread_id>', 'Thread tag or UUID')
-  .option('--yes', 'Skip confirmation')
+  .option('--yes', 'Skip confirmation prompts')
   .action(async (threadId: string, options) => {
     try {
-      const index = loadIndex();
       const validatedId = validateTag(threadId);
 
-      if (!index[validatedId]) {
+      // Check existence via meta index
+      const meta = loadMetaIndex();
+      if (!meta.threads[validatedId]) {
         console.error(`Thread ID '${validatedId}' not found.`);
+        process.exitCode = 1;
         return;
       }
 
@@ -40,10 +28,19 @@ export const deleteCommand = new Command('delete')
         }
       }
 
-      delete index[validatedId];
-      saveIndex(index);
+      deleteThreadFile(validatedId);
+
+      // Clean up semantic index embeddings for the deleted thread
+      try {
+        const semanticIndex = await getSemanticIndex();
+        await semanticIndex.deleteThread(validatedId);
+      } catch {
+        // Non-fatal: semantic index may not exist
+      }
+
       console.log(`Deleted thread '${validatedId}'.`);
     } catch (error) {
       console.error(`Error: ${error instanceof Error ? error.message : error}`);
+      process.exitCode = 1;
     }
   });

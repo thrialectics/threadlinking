@@ -1,29 +1,15 @@
 import { Command } from 'commander';
-import { createInterface } from 'readline';
-import { loadIndex, saveIndex } from '../core/index.js';
-
-function prompt(question: string): Promise<string> {
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer);
-    });
-  });
-}
+import { loadMetaIndex, deleteThreadFile, prompt } from '../core/index.js';
 
 export const clearCommand = new Command('clear')
   .description('Delete ALL threads from the index (dangerous)')
   .option('--yes', 'Skip confirmation prompts')
   .action(async (options) => {
     try {
-      const index = loadIndex();
+      const meta = loadMetaIndex();
+      const threadIds = Object.keys(meta.threads);
 
-      if (Object.keys(index).length === 0) {
+      if (threadIds.length === 0) {
         console.log('Index is already empty.');
         return;
       }
@@ -44,9 +30,14 @@ export const clearCommand = new Command('clear')
         }
       }
 
-      saveIndex({});
+      // Delete each thread file
+      for (const id of threadIds) {
+        deleteThreadFile(id);
+      }
+
       console.log('All threads deleted.');
     } catch (error) {
       console.error(`Error: ${error instanceof Error ? error.message : error}`);
+      process.exitCode = 1;
     }
   });

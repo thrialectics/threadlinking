@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { loadIndex, saveIndex, validateTag } from '../core/index.js';
+import { loadThread, saveThread, deleteThreadFile, loadMetaIndex, validateTag } from '../core/index.js';
 
 export const renameCommand = new Command('rename')
   .description('Rename a thread tag')
@@ -7,27 +7,42 @@ export const renameCommand = new Command('rename')
   .argument('<new_id>', 'New thread tag')
   .action((oldId: string, newId: string) => {
     try {
-      const index = loadIndex();
       const validatedOld = validateTag(oldId);
       const validatedNew = validateTag(newId);
 
-      if (!index[validatedOld]) {
+      // Check via meta index
+      const meta = loadMetaIndex();
+
+      if (!meta.threads[validatedOld]) {
         console.error(`Thread ID '${validatedOld}' not found.`);
+        process.exitCode = 1;
         return;
       }
 
-      if (index[validatedNew]) {
+      if (meta.threads[validatedNew]) {
         console.error(`Target ID '${validatedNew}' already exists.`);
+        process.exitCode = 1;
         return;
       }
 
-      index[validatedNew] = index[validatedOld];
-      delete index[validatedOld];
-      index[validatedNew].date_modified = new Date().toISOString();
+      // Load the old thread
+      const thread = loadThread(validatedOld);
+      if (!thread) {
+        console.error(`Thread ID '${validatedOld}' not found.`);
+        process.exitCode = 1;
+        return;
+      }
 
-      saveIndex(index);
+      // Update date_modified
+      thread.date_modified = new Date().toISOString();
+
+      // Save as new thread, delete old
+      saveThread(validatedNew, thread);
+      deleteThreadFile(validatedOld);
+
       console.log(`Renamed '${validatedOld}' -> '${validatedNew}'.`);
     } catch (error) {
       console.error(`Error: ${error instanceof Error ? error.message : error}`);
+      process.exitCode = 1;
     }
   });

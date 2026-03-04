@@ -1,7 +1,7 @@
 // Snippet operation - add context to a thread
 // Returns result object instead of console.log for MCP compatibility
 
-import { updateIndex } from '../storage.js';
+import { updateThread, saveThread, loadMetaIndex } from '../storage.js';
 import {
   validateTag,
   validateUrl,
@@ -10,7 +10,7 @@ import {
   MAX_SNIPPET_LENGTH,
   MAX_SUMMARY_LENGTH,
 } from '../utils.js';
-import type { OperationResult, SnippetResult, SnippetInput, Snippet, ThreadIndex } from '../types.js';
+import type { OperationResult, SnippetResult, SnippetInput, Snippet, Thread } from '../types.js';
 import { indexSnippet } from './semantic.js';
 
 export async function addSnippet(input: SnippetInput): Promise<OperationResult<SnippetResult>> {
@@ -47,47 +47,47 @@ export async function addSnippet(input: SnippetInput): Promise<OperationResult<S
       snippet.tags = input.tags.map((t) => t.trim().toLowerCase()).filter((t) => t.length > 0);
     }
 
-    // Track result from inside the locked update
+    // Check if thread exists
+    const meta = loadMetaIndex();
+    const threadExists = validatedId in meta.threads;
+
     let createdNew = false;
     let snippetCount = 0;
 
-    // Use locked update to prevent race conditions
-    updateIndex((index: ThreadIndex) => {
-      // Auto-create thread if needed
-      if (!index[validatedId]) {
-        let summary: string;
-        if (input.summary) {
-          summary = sanitizeString(input.summary, MAX_SUMMARY_LENGTH);
-        } else {
-          // Use first 80 chars of snippet as summary
-          const firstLine = snippetContent.split('\n')[0].slice(0, 80);
-          summary = firstLine.length < 10 ? snippetContent.slice(0, 80) : firstLine;
-          if (snippetContent.length > 80) summary += '...';
+    if (threadExists) {
+      // Update existing thread with per-thread locking
+      updateThread(validatedId, (thread: Thread) => {
+        if (!thread.snippets) {
+          thread.snippets = [];
         }
-
-        index[validatedId] = {
-          summary,
-          snippets: [],
-          linked_files: [],
-          chat_url: '',
-          date_created: new Date().toISOString(),
-        };
-        createdNew = true;
+        thread.snippets.push(snippet);
+        thread.date_modified = new Date().toISOString();
+        snippetCount = thread.snippets.length;
+        return thread;
+      });
+    } else {
+      // Auto-create thread
+      let summary: string;
+      if (input.summary) {
+        summary = sanitizeString(input.summary, MAX_SUMMARY_LENGTH);
+      } else {
+        const firstLine = snippetContent.split('\n')[0].slice(0, 80);
+        summary = firstLine.length < 10 ? snippetContent.slice(0, 80) : firstLine;
+        if (snippetContent.length > 80) summary += '...';
       }
 
-      // Ensure snippets array exists (for old threads)
-      if (!index[validatedId].snippets) {
-        index[validatedId].snippets = [];
-      }
+      const newThread: Thread = {
+        summary,
+        snippets: [snippet],
+        linked_files: [],
+        chat_url: '',
+        date_created: new Date().toISOString(),
+      };
 
-      // Add snippet
-      index[validatedId].snippets.push(snippet);
-      index[validatedId].date_modified = new Date().toISOString();
-
-      snippetCount = index[validatedId].snippets.length;
-
-      return index;
-    });
+      saveThread(validatedId, newThread);
+      createdNew = true;
+      snippetCount = 1;
+    }
 
     const snippetIndex = snippetCount - 1;
 

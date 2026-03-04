@@ -2,8 +2,8 @@ import { Command } from 'commander';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, appendFileSync, copyFileSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
-import { createInterface } from 'readline';
 import { getDefaultIgnoreContent } from '../core/ignore.js';
+import { prompt } from '../core/utils.js';
 
 const CLAUDE_DIR = join(homedir(), '.claude');
 const SETTINGS_PATH = join(CLAUDE_DIR, 'settings.json');
@@ -93,18 +93,9 @@ interface SetupStatus {
   mcpJsonValid: boolean;
 }
 
-function ask(question: string): Promise<string> {
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.trim().toLowerCase());
-    });
-  });
+async function ask(question: string): Promise<string> {
+  const answer = await prompt(question);
+  return answer.trim().toLowerCase();
 }
 
 function loadSettings(): { settings: Record<string, unknown>; valid: boolean } {

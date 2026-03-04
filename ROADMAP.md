@@ -8,11 +8,7 @@ The goal: When you ask "why did we build it this way?", the answer should be a c
 
 ---
 
-## Current State (v2.0.0)
-
-### Version Status
-- **GitHub**: v2.0.0 (main branch)
-- **npm**: v1.1.1 (needs publishing)
+## Current State (v2.0.x)
 
 ### All Features (Free)
 - Thread-based context preservation
@@ -20,29 +16,26 @@ The goal: When you ask "why did we build it this way?", the answer should be a c
 - File attachments with explain command
 - Cross-session, cross-repo persistence
 - Keyword search
-- Semantic search (local embeddings via wink-nlp)
+- Semantic search (local embeddings via @xenova/transformers)
 - Analytics (usage stats)
 - Export (markdown/JSON/timeline formats)
 - MCP server integration with Claude Code
+- `.threadlinkingignore` support with prune command
+- Guided setup via `threadlinking init`
 
 ---
 
-## Phase 1: Publish v2.0.0 to npm
+## Phase 1: Publish & CI
 
 **Priority: HIGH**
 
-The main blocker for wider adoption.
-
-- [ ] Add basic test suite
-  - Core: thread CRUD, snippet operations
-  - CLI: smoke tests for main commands
-- [ ] Set up GitHub Actions CI
-  - Run tests on push
-  - Lint check
-  - Build verification
-- [ ] Update README with v2.0 features
+- [x] Publish v2.0.x to npm
+- [x] Set up GitHub Actions CI (ubuntu/macos/windows, Node 20 & 22)
+- [ ] Add comprehensive test suite
+  - Core operation unit tests
+  - Storage layer tests
+  - Integration/lifecycle tests
 - [ ] Verify Windows compatibility (path separators)
-- [ ] **Publish v2.0.0 to npm**
 
 ---
 
@@ -52,27 +45,25 @@ The main blocker for wider adoption.
 
 - [ ] Submit to official MCP Registry
 - [ ] Add `mcp.json` manifest file
-- [ ] Create setup instructions for Claude Code users
-  - **Recommend `~/.claude/mcp.json`** (dedicated MCP config, not settings.json)
-  - Document the difference: mcp.json is for MCP servers only, settings.json mixes personal config
-  - Provide simple copy-paste config:
-    ```json
-    {
-      "mcpServers": {
-        "threadlinking": {
-          "command": "npx",
-          "args": ["threadlinking-mcp"]
-        }
-      }
-    }
-    ```
-  - Note: Users can also use settings.json → mcpServers if they prefer single-file config
+- [x] Create setup instructions for Claude Code users (`threadlinking init`)
 - [ ] List on directories: Smithery, Glama, MCP.so
 - [ ] Submit PR to awesome-mcp-servers
 
 ---
 
-## Phase 3: IDE Integration
+## Phase 3: File-Per-Thread Architecture
+
+Split `thread_index.json` into one file per thread for better concurrency and inspectability.
+
+- [ ] Design migration strategy
+- [ ] New `loadThread(id)` / `saveThread(id)` / `updateThread(id, fn)` storage layer
+- [ ] Per-thread locking (instead of global lock)
+- [ ] Automatic migration from monolithic to file-per-thread
+- [ ] Update all operations to use new storage layer
+
+---
+
+## Phase 4: IDE Integration
 
 - [ ] VSCode extension
   - Right-click file → "Show Threadlinking Context"
@@ -82,12 +73,14 @@ The main blocker for wider adoption.
 
 ---
 
-## Phase 4: Future Enhancements
+## Phase 5: Future Enhancements
 
 - [ ] Thread relationships (link related threads)
 - [ ] Context summarization (AI-generated thread summaries)
 - [ ] Team/org features (optional, shared threads)
 - [ ] Cloud sync (optional, remains local-first by default)
+- [ ] Command syntax redesign for power users
+- [ ] Flat/nested attribute system
 
 ---
 
@@ -105,4 +98,4 @@ Ideas and PRs welcome. Open an issue to discuss before implementing major featur
 
 ---
 
-*Last updated: 2026-01-24*
+*Last updated: 2026-03-04*
