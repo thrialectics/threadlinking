@@ -14,6 +14,7 @@ import { updateCommand } from './commands/update.js';
 import { renameCommand } from './commands/rename.js';
 import { auditCommand } from './commands/audit.js';
 import { clearCommand } from './commands/clear.js';
+import { pruneCommand } from './commands/prune.js';
 import { initCommand } from './commands/init.js';
 import { trackCommand } from './commands/track.js';
 import { statusCommand } from './commands/status.js';
@@ -44,6 +45,7 @@ program.addCommand(renameCommand);
 program.addCommand(deleteCommand);
 program.addCommand(auditCommand);
 program.addCommand(clearCommand);
+program.addCommand(pruneCommand);
 
 // Setup commands
 program.addCommand(initCommand);

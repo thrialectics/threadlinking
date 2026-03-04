@@ -35,7 +35,6 @@ export const reindexCommand = new Command('reindex')
       }
       process.exit(1);
     } finally {
-      // Clean up Python process
       cleanup();
     }
   });

@@ -5,6 +5,7 @@ import { resolve, dirname } from 'path';
 import { homedir } from 'os';
 import { existsSync } from 'fs';
 import { execSync } from 'child_process';
+import { createInterface } from 'readline';
 
 // Security constants
 export const MAX_SUMMARY_LENGTH = 500;
@@ -118,6 +119,20 @@ export function parseTags(tagString: string): string[] {
  * Detect the project root for the current directory.
  * Returns null if not in a project directory (e.g., home directory).
  */
+export function prompt(question: string): Promise<string> {
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer);
+    });
+  });
+}
+
 export function detectProjectRoot(): string | null {
   const cwd = process.cwd();
   const home = homedir();

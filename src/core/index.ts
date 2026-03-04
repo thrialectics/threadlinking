@@ -28,6 +28,7 @@ export {
   truncate,
   parseTags,
   detectProjectRoot,
+  prompt,
   MAX_SUMMARY_LENGTH,
   MAX_TAG_LENGTH,
   MAX_SNIPPET_LENGTH,

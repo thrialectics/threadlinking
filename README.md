@@ -115,6 +115,7 @@ If you prefer to configure components individually instead of using `init`:
 | PostToolUse hook | Auto-tracks files you create/edit | `~/.claude/settings.json` |
 | MCP Server | Gives Claude direct tool access | `~/.claude/mcp.json` |
 | CLAUDE.md block | Teaches Claude when/how to use threadlinking | `~/.claude/CLAUDE.md` |
+| Ignore file | Filters noise from pending files | `~/.threadlinkingignore` |
 
 All components are optional and can be skipped during init.
 

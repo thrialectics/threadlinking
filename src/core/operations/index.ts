@@ -13,7 +13,6 @@ export { searchThreads } from './search.js';
 export { pruneIgnored } from './prune.js';
 export type { PruneResult } from './prune.js';
 
-// Premium operations (license required)
 export { semanticSearch } from './semantic.js';
 export { getAnalytics } from './analytics.js';
 export { exportThread } from './export.js';

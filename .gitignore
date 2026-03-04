@@ -4,3 +4,6 @@ dist/
 .DS_Store
 /.mcp.json
 Context.md
+CHANGELOG.md
+HANDOFF-*.md
+*.jpg

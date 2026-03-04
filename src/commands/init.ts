@@ -3,11 +3,13 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, appendFileSync, cop
 import { homedir } from 'os';
 import { join } from 'path';
 import { createInterface } from 'readline';
+import { getDefaultIgnoreContent } from '../core/ignore.js';
 
 const CLAUDE_DIR = join(homedir(), '.claude');
 const SETTINGS_PATH = join(CLAUDE_DIR, 'settings.json');
 const MCP_JSON_PATH = join(CLAUDE_DIR, 'mcp.json');
 const CLAUDE_MD_PATH = join(CLAUDE_DIR, 'CLAUDE.md');
+const GLOBAL_IGNORE_PATH = join(homedir(), '.threadlinkingignore');
 
 const POST_TOOL_USE_HOOK_CONFIG = {
   matcher: 'Edit|Write',
@@ -86,6 +88,7 @@ interface SetupStatus {
   sessionStartHookInstalled: boolean;
   mcpConfigured: boolean;
   claudeMdPresent: boolean;
+  ignoreFilePresent: boolean;
   settingsJsonValid: boolean;
   mcpJsonValid: boolean;
 }
@@ -175,6 +178,9 @@ function checkStatus(): SetupStatus {
     claudeMdPresent = content.toLowerCase().includes('threadlinking');
   }
 
+  // Check ignore file
+  const ignoreFilePresent = existsSync(GLOBAL_IGNORE_PATH);
+
   return {
     claudeCodeDetected,
     claudeDirExists,
@@ -182,6 +188,7 @@ function checkStatus(): SetupStatus {
     sessionStartHookInstalled,
     mcpConfigured,
     claudeMdPresent,
+    ignoreFilePresent,
     settingsJsonValid,
     mcpJsonValid,
   };
@@ -309,6 +316,7 @@ function printStatus(status: SetupStatus): void {
   console.log(`  SessionStart hook:  ${status.sessionStartHookInstalled ? '\u2713 Installed' : '\u2717 Not installed'}`);
   console.log(`  MCP server:         ${status.mcpConfigured ? '\u2713 Configured (mcp.json)' : '\u2717 Not configured'}`);
   console.log(`  CLAUDE.md:          ${status.claudeMdPresent ? '\u2713 Present' : '\u2717 Not present'}`);
+  console.log(`  Ignore file:        ${status.ignoreFilePresent ? '\u2713 Present' : '\u2717 Not present'}`);
 
   if (!status.settingsJsonValid && existsSync(SETTINGS_PATH)) {
     console.log(`  settings.json:      \u2717 Invalid JSON`);
@@ -371,7 +379,7 @@ export const initCommand = new Command('init')
     }
 
     // Step 1: PostToolUse hook
-    console.log('[1/4] PostToolUse hook (auto-tracks files you create)');
+    console.log('[1/5] PostToolUse hook (auto-tracks files you create)');
     if (status.postToolUseHookInstalled) {
       console.log('      Status: Already installed');
       console.log('      \u2713 Skipping\n');
@@ -398,7 +406,7 @@ export const initCommand = new Command('init')
     }
 
     // Step 2: SessionStart hook
-    console.log('[2/4] SessionStart hook (shows context at session start)');
+    console.log('[2/5] SessionStart hook (shows context at session start)');
     if (status.sessionStartHookInstalled) {
       console.log('      Status: Already installed');
       console.log('      \u2713 Skipping\n');
@@ -419,7 +427,7 @@ export const initCommand = new Command('init')
     }
 
     // Step 3: MCP Server (uses separate mcp.json file)
-    console.log('[3/4] MCP Server (gives Claude direct access to threadlinking tools)');
+    console.log('[3/5] MCP Server (gives Claude direct access to threadlinking tools)');
     let { mcpJson, valid: mcpJsonValid } = loadMcpJson();
 
     // Handle invalid mcp.json
@@ -475,7 +483,7 @@ export const initCommand = new Command('init')
     }
 
     // Step 4: CLAUDE.md
-    console.log('[4/4] CLAUDE.md instructions (teaches Claude when/how to use threadlinking)');
+    console.log('[4/5] CLAUDE.md instructions (teaches Claude when/how to use threadlinking)');
     if (status.claudeMdPresent) {
       console.log('      Status: Already present');
       console.log('      \u2713 Skipping\n');
@@ -489,6 +497,26 @@ export const initCommand = new Command('init')
       if (shouldInstall) {
         installClaudeMd();
         console.log('      \u2713 Instructions added\n');
+      } else {
+        console.log('      Skipped\n');
+      }
+    }
+
+    // Step 5: Ignore file
+    console.log('[5/5] Ignore file (filters noise from pending files list)');
+    if (status.ignoreFilePresent) {
+      console.log('      Status: Already present');
+      console.log('      \u2713 Skipping\n');
+    } else {
+      console.log('      Status: Not present');
+      let shouldInstall = true;
+      if (options.interactive !== false) {
+        const answer = await ask('      Create ~/.threadlinkingignore? (Y/n) ');
+        shouldInstall = answer !== 'n' && answer !== 'no';
+      }
+      if (shouldInstall) {
+        writeFileSync(GLOBAL_IGNORE_PATH, getDefaultIgnoreContent(), 'utf-8');
+        console.log('      \u2713 Ignore file created\n');
       } else {
         console.log('      Skipped\n');
       }
