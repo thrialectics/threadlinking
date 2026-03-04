@@ -1,8 +1,10 @@
 // Utility functions for threadlinking
 // Shared by CLI and MCP server
 
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
 import { homedir } from 'os';
+import { existsSync } from 'fs';
+import { execSync } from 'child_process';
 
 // Security constants
 export const MAX_SUMMARY_LENGTH = 500;
@@ -110,4 +112,56 @@ export function parseTags(tagString: string): string[] {
     .split(',')
     .map((t) => t.trim().toLowerCase())
     .filter((t) => t.length > 0);
+}
+
+/**
+ * Detect the project root for the current directory.
+ * Returns null if not in a project directory (e.g., home directory).
+ */
+export function detectProjectRoot(): string | null {
+  const cwd = process.cwd();
+  const home = homedir();
+
+  // Don't treat home directory as a project
+  if (cwd === home) {
+    return null;
+  }
+
+  // Try git first (most reliable)
+  try {
+    const gitRoot = execSync('git rev-parse --show-toplevel', {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+
+    // Don't treat home directory as a project even if it's a git repo
+    if (gitRoot === home) {
+      return null;
+    }
+
+    return gitRoot;
+  } catch {
+    // Not a git repo, continue checking
+  }
+
+  // Check for project markers in current directory
+  const markers = ['package.json', 'CLAUDE.md', 'pyproject.toml', 'Cargo.toml', '.git'];
+  for (const marker of markers) {
+    if (existsSync(marker)) {
+      return cwd;
+    }
+  }
+
+  // Walk up looking for project markers (but stop at home)
+  let checkDir = cwd;
+  while (checkDir !== '/' && checkDir !== home) {
+    for (const marker of markers) {
+      if (existsSync(`${checkDir}/${marker}`)) {
+        return checkDir;
+      }
+    }
+    checkDir = dirname(checkDir);
+  }
+
+  return null;
 }

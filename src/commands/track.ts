@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { existsSync } from 'fs';
 import { loadIndex, updatePending, resolvePath } from '../core/index.js';
+import { isIgnored } from '../core/ignore.js';
 
 export const trackCommand = new Command('track')
   .description('Track a file for later context (called by hooks)')
@@ -12,6 +13,11 @@ export const trackCommand = new Command('track')
 
       // Skip non-existent files (might be temp files)
       if (!existsSync(resolvedPath)) {
+        return;
+      }
+
+      // Skip ignored files (build artifacts, node_modules, etc.)
+      if (isIgnored(resolvedPath)) {
         return;
       }
 

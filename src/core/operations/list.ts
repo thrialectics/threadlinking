@@ -3,6 +3,7 @@
 
 import { basename } from 'path';
 import { loadIndex, loadPending, savePending } from '../storage.js';
+import { isIgnored } from '../ignore.js';
 import type { OperationResult, ListResult, ListOptions } from '../types.js';
 
 export function listThreads(options?: ListOptions): OperationResult<ListResult> {
@@ -50,7 +51,9 @@ export function listThreads(options?: ListOptions): OperationResult<ListResult> 
       // Filter out files already linked to any thread
       const allLinkedFiles = new Set(Object.values(index).flatMap((t) => t.linked_files || []));
 
-      const untracked = pendingState.tracked.filter((f) => !allLinkedFiles.has(f.path));
+      const untracked = pendingState.tracked
+        .filter((f) => !allLinkedFiles.has(f.path))
+        .filter((f) => !isIgnored(f.path));
 
       // Sort by last_modified descending
       untracked.sort(

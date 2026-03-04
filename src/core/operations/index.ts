@@ -9,6 +9,10 @@ export { showThread, getThread } from './show.js';
 export { listThreads, clearPending } from './list.js';
 export { searchThreads } from './search.js';
 
+// Maintenance operations
+export { pruneIgnored } from './prune.js';
+export type { PruneResult } from './prune.js';
+
 // Premium operations (license required)
 export { semanticSearch } from './semantic.js';
 export { getAnalytics } from './analytics.js';
