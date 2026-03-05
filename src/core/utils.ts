@@ -36,8 +36,13 @@ export function validateTag(tag: string): string {
     throw new Error(`Tag too long (max ${MAX_TAG_LENGTH} characters)`);
   }
 
-  // Check for dangerous characters
-  if (/[<>"'&\n\r\0]/.test(tag)) {
+  // Check for dangerous characters (including path traversal)
+  if (/[<>"'&\n\r\0\/\\]/.test(tag)) {
+    throw new Error('Tag contains invalid characters');
+  }
+
+  // Block path traversal
+  if (tag.includes('..')) {
     throw new Error('Tag contains invalid characters');
   }
 

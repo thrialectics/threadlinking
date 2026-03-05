@@ -23,7 +23,7 @@ import {
   unlinkSync,
 } from 'fs';
 import { homedir } from 'os';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { lockSync, unlockSync } from 'proper-lockfile';
 import type { Thread, ThreadIndex } from './types.js';
 
@@ -105,6 +105,15 @@ function atomicWrite(filePath: string, content: string): void {
   chmodSync(filePath, 0o600);
 }
 
+function safeThreadPath(id: string): string {
+  const threadPath = join(THREADS_DIR, `${id}.json`);
+  // Defense-in-depth: ensure resolved path stays under THREADS_DIR
+  if (!resolve(threadPath).startsWith(resolve(THREADS_DIR))) {
+    throw new Error('Invalid thread ID: path traversal detected');
+  }
+  return threadPath;
+}
+
 function extractMeta(thread: Thread): ThreadMeta {
   return {
     summary: thread.summary,
@@ -150,7 +159,7 @@ function migrateToPerThread(): void {
     const meta: MetaIndex = { version: 2, threads: {} };
 
     for (const [id, thread] of Object.entries(oldIndex)) {
-      atomicWrite(join(THREADS_DIR, `${id}.json`), JSON.stringify(thread, null, 2));
+      atomicWrite(safeThreadPath(id), JSON.stringify(thread, null, 2));
       meta.threads[id] = extractMeta(thread);
     }
 
@@ -234,7 +243,7 @@ export function updateMetaIndex(fn: (meta: MetaIndex) => MetaIndex): MetaIndex {
 export function loadThread(id: string): Thread | null {
   ensureMigrated();
 
-  const threadPath = join(THREADS_DIR, `${id}.json`);
+  const threadPath = safeThreadPath(id);
   if (!existsSync(threadPath)) return null;
 
   try {
@@ -253,7 +262,7 @@ export function saveThread(id: string, thread: Thread): void {
   ensureThreadsDir();
 
   // Write thread file atomically
-  atomicWrite(join(THREADS_DIR, `${id}.json`), JSON.stringify(thread, null, 2));
+  atomicWrite(safeThreadPath(id), JSON.stringify(thread, null, 2));
 
   // Update meta index (locked)
   updateMetaIndex((meta) => {
@@ -270,7 +279,7 @@ export function updateThread(id: string, fn: (thread: Thread) => Thread): Thread
   ensureMigrated();
   ensureThreadsDir();
 
-  const threadPath = join(THREADS_DIR, `${id}.json`);
+  const threadPath = safeThreadPath(id);
   ensureFileExists(threadPath, '{}');
 
   let release: (() => void) | null = null;
@@ -309,7 +318,7 @@ export function updateThread(id: string, fn: (thread: Thread) => Thread): Thread
 export function deleteThreadFile(id: string): void {
   ensureMigrated();
 
-  const threadPath = join(THREADS_DIR, `${id}.json`);
+  const threadPath = safeThreadPath(id);
   if (existsSync(threadPath)) {
     unlinkSync(threadPath);
   }
@@ -363,7 +372,7 @@ export function saveIndex(index: ThreadIndex): void {
 
   // Write each thread file
   for (const [id, thread] of Object.entries(index)) {
-    atomicWrite(join(THREADS_DIR, `${id}.json`), JSON.stringify(thread, null, 2));
+    atomicWrite(safeThreadPath(id), JSON.stringify(thread, null, 2));
   }
 
   // Remove thread files not in the new index
