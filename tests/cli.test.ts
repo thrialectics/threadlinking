@@ -1,14 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { join } from 'path';
 
 const CLI_PATH = join(__dirname, '../dist/index.js');
+const CLI_TIMEOUT_MS = 30000;
 
 function runCli(args: string): { stdout: string; exitCode: number } {
+  const argv = args.trim() ? args.trim().split(/\s+/) : [];
   try {
-    const stdout = execSync(`node ${CLI_PATH} ${args}`, {
+    const stdout = execFileSync(process.execPath, [CLI_PATH, ...argv], {
       encoding: 'utf-8',
-      timeout: 10000,
+      timeout: CLI_TIMEOUT_MS,
     });
     return { stdout, exitCode: 0 };
   } catch (error: any) {

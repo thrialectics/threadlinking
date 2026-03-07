@@ -8,9 +8,9 @@ Your team is working on a project. Files get created, design decisions are made,
 
 > "Why was it built this way? What were we thinking?"
 
-Threadlinking solves this. It captures the reasoning behind decisions when creating files, so you can always trace back to the "why" — even across sessions, teammates, and repos.
+Threadlinking solves this by capturing decision rationale for your files and code, so you can trace your "why" across sessions, teammates, and repos.
 
-**The key insight:** A thread is a container for an **idea or project**, not a feature or task. One thread might span months of work, dozens of files, and hundreds of snippets across multiple repos. When someone starts a new session next week, threadlinking connects it back to the earlier decisions — preserving context across the gaps.
+A thread is a container for an **idea or project**, not just a feature or task. One thread might span months of work, dozens of files, and hundreds of snippets across multiple repos. When someone starts a new session next week, threadlinking connects it back to the earlier decisions, preserving context across the gaps.
 
 ---
 
