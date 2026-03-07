@@ -99,7 +99,8 @@ Threads are long-lived containers that accumulate context over time.
 ## Data Storage
 
 All data is stored locally:
-- `~/.threadlinking/thread_index.json` - All threads and snippets
+- `~/.threadlinking/index.json` - Thread metadata (names, summaries, file counts)
+- `~/.threadlinking/threads/*.json` - One file per thread with snippets and linked files
 - `~/.threadlinking/semantic_index/` - Semantic search index
 - `~/.threadlinking/pending_files.json` - Tracked but unlinked files
 

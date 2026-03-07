@@ -14,6 +14,73 @@ A thread is a container for an **idea or project**, not just a feature or task. 
 
 ---
 
+## Claude Code Plugin
+
+Threadlinking ships as a **Claude Code plugin** — when you run `threadlinking init`, it installs an MCP server that gives Claude direct access to threadlinking tools. Claude can create threads, save snippets, link files, and search context without you ever touching the CLI.
+
+### MCP Tools
+
+These are the tools Claude gets when the MCP server is active:
+
+| Tool | What it does |
+|------|-------------|
+| `threadlinking_snippet` | Save decision context to a thread |
+| `threadlinking_create` | Create a new empty thread |
+| `threadlinking_attach` | Link a file to a thread |
+| `threadlinking_detach` | Unlink a file from a thread |
+| `threadlinking_explain` | Show why a file exists |
+| `threadlinking_show` | View full thread details |
+| `threadlinking_list` | List all threads + pending files |
+| `threadlinking_search` | Keyword search across threads |
+| `threadlinking_semantic_search` | Natural language search by meaning |
+| `threadlinking_analytics` | Usage stats and insights |
+| `threadlinking_export` | Export threads (markdown, JSON, timeline) |
+| `threadlinking_status` | Check available features and version |
+
+### Slash Commands
+
+The plugin adds slash commands you can use directly in Claude Code:
+
+| Command | What it does |
+|---------|-------------|
+| `/threadlink <thread> "context" [file]` | Save context and optionally attach a file |
+| `/context [thread]` | List all threads, or show details of one |
+| `/explain <file>` | Show why a file exists |
+| `/save-context <thread> <context>` | Quick-save decision context |
+| `/context-capture [thread]` | Analyze the session and capture what was done and why |
+| `/thread-review [thread]` | Review full history of a thread |
+| `/find-context <query>` | Semantic + keyword search across threads |
+| `/thread-stats` | Usage analytics and insights |
+| `/explain-file <file>` | Show the decisions behind a file |
+
+### Hooks
+
+Two Claude Code hooks automate context tracking:
+
+- **PostToolUse** — When Claude creates or edits a file, the hook automatically adds it to the pending files list so nothing slips through untracked.
+- **SessionStart** — At the start of every session, shows your active threads and any pending unlinked files, so Claude (and you) have immediate context.
+
+### CLAUDE.md Integration
+
+The init also appends instructions to your global `~/.claude/CLAUDE.md` that teach Claude *when* and *how* to save context — detecting decisions, prompting for thread names, and saving snippets at natural points in the conversation.
+
+### Claude Desktop
+
+The MCP server also works with Claude Desktop. Add it to your config manually:
+
+```json
+// ~/Library/Application Support/Claude/claude_desktop_config.json
+{
+  "mcpServers": {
+    "threadlinking": {
+      "command": "threadlinking-mcp"
+    }
+  }
+}
+```
+
+---
+
 ## Installation
 
 ### Quick Start
@@ -99,11 +166,9 @@ See [Commands](#commands) for the full reference.
 
 If you prefer to configure components individually instead of using `init`:
 
-**MCP Server only** (Claude Desktop or Claude Code):
+**MCP Server only** (add to `~/.claude/mcp.json`):
 
 ```json
-// ~/.claude/mcp.json (Claude Code)
-// or ~/Library/Application Support/Claude/claude_desktop_config.json (Claude Desktop)
 {
   "mcpServers": {
     "threadlinking": {
@@ -113,11 +178,14 @@ If you prefer to configure components individually instead of using `init`:
 }
 ```
 
+For Claude Desktop, see [Claude Desktop](#claude-desktop) above.
+
 ### What Gets Installed
 
 | Component | Purpose | Location |
 |-----------|---------|----------|
 | PostToolUse hook | Auto-tracks files you create/edit | `~/.claude/settings.json` |
+| SessionStart hook | Shows thread context at session start | `~/.claude/settings.json` |
 | MCP Server | Gives Claude direct tool access | `~/.claude/mcp.json` |
 | CLAUDE.md block | Teaches Claude when/how to use threadlinking | `~/.claude/CLAUDE.md` |
 | Ignore file | Filters noise from pending files | `~/.threadlinkingignore` |
@@ -307,7 +375,12 @@ threadlinking export --format markdown myproject # Single thread
 
 ## Data Storage
 
-Everything is stored locally at `~/.threadlinking/thread_index.json`. No cloud, no sync — just a simple JSON file your team controls.
+Everything is stored locally at `~/.threadlinking/`. No cloud, no sync — just JSON files your team controls.
+
+- `index.json` — thread metadata (names, summaries, file counts)
+- `threads/*.json` — one file per thread with snippets and linked files
+- `semantic_index/` — local embeddings for semantic search
+- `pending_files.json` — files edited but not yet linked
 
 ---
 
