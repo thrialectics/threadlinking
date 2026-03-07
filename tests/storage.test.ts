@@ -10,16 +10,19 @@ import { join } from 'path';
 // 3. Use dynamic import() so re-evaluations pick up the new HOME
 
 const originalHome = process.env.HOME;
+const originalUserProfile = process.env.USERPROFILE;
 let tempHome: string;
 
 beforeEach(() => {
   tempHome = mkdtempSync(join(tmpdir(), 'tl-storage-test-'));
   process.env.HOME = tempHome;
+  process.env.USERPROFILE = tempHome; // Windows uses USERPROFILE for homedir()
   vi.resetModules();
 });
 
 afterEach(() => {
   process.env.HOME = originalHome;
+  process.env.USERPROFILE = originalUserProfile;
   rmSync(tempHome, { recursive: true, force: true });
 });
 
@@ -215,6 +218,8 @@ describe('saveIndex', () => {
   });
 
   it('sets 0600 permissions on thread files', async () => {
+    if (process.platform === 'win32') return; // Windows doesn't support Unix permissions
+
     const { saveIndex } = await import('../src/core/storage.js');
 
     saveIndex({ mythread: makeThread() });
@@ -555,6 +560,8 @@ describe('savePending', () => {
   });
 
   it('sets 0600 permissions on the pending file', async () => {
+    if (process.platform === 'win32') return; // Windows doesn't support Unix permissions
+
     const { savePending } = await import('../src/core/storage.js');
 
     savePending({ tracked: [] });

@@ -7,10 +7,12 @@ import { join } from 'path';
 
 let tempHome: string;
 const originalHome = process.env.HOME;
+const originalUserProfile = process.env.USERPROFILE;
 
 beforeEach(() => {
   tempHome = mkdtempSync(join(tmpdir(), 'tl-test-'));
   process.env.HOME = tempHome;
+  process.env.USERPROFILE = tempHome; // Windows uses USERPROFILE for homedir()
   vi.resetModules();
 });
 
@@ -19,6 +21,11 @@ afterEach(() => {
     process.env.HOME = originalHome;
   } else {
     delete process.env.HOME;
+  }
+  if (originalUserProfile !== undefined) {
+    process.env.USERPROFILE = originalUserProfile;
+  } else {
+    delete process.env.USERPROFILE;
   }
   rmSync(tempHome, { recursive: true, force: true });
 });

@@ -4,16 +4,19 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 
 const originalHome = process.env.HOME;
+const originalUserProfile = process.env.USERPROFILE;
 let tempHome: string;
 
 beforeEach(() => {
   tempHome = mkdtempSync(join(tmpdir(), 'tl-lifecycle-test-'));
   process.env.HOME = tempHome;
+  process.env.USERPROFILE = tempHome; // Windows uses USERPROFILE for homedir()
   vi.resetModules();
 });
 
 afterEach(() => {
   process.env.HOME = originalHome;
+  process.env.USERPROFILE = originalUserProfile;
   rmSync(tempHome, { recursive: true, force: true });
 });
 
