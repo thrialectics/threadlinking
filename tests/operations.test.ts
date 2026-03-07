@@ -1,7 +1,10 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync, mkdirSync } from 'fs';
 import { tmpdir } from 'os';
-import { join } from 'path';
+import { join, resolve } from 'path';
+
+/** Resolve a path for cross-platform compatibility (Windows resolves /tmp to D:\tmp) */
+const p = (filePath: string) => resolve(filePath);
 
 // ─── Shared test infrastructure ─────────────────────────────────────────────
 
@@ -304,7 +307,7 @@ describe('attachFile', () => {
     attachFile({ threadId: 'store-path', filePath: '/tmp/test/component.ts' });
     const index = loadIndex();
 
-    expect(index['store-path'].linked_files).toContain('/tmp/test/component.ts');
+    expect(index['store-path'].linked_files).toContain(p('/tmp/test/component.ts'));
   });
 
   it('returns the filePath in data', async () => {
@@ -313,7 +316,7 @@ describe('attachFile', () => {
 
     const result = attachFile({ threadId: 'data-path', filePath: '/tmp/test/api.ts' });
 
-    expect(result.data?.filePath).toBe('/tmp/test/api.ts');
+    expect(result.data?.filePath).toBe(p('/tmp/test/api.ts'));
   });
 
   it('returns success:false with THREAD_NOT_FOUND when thread does not exist', async () => {
@@ -335,7 +338,7 @@ describe('attachFile', () => {
 
   it('is idempotent: returns success when file is already linked', async () => {
     await seedIndex({
-      'idempotent-thread': makeThread({ linked_files: ['/tmp/test/already.ts'] }),
+      'idempotent-thread': makeThread({ linked_files: [p('/tmp/test/already.ts')] }),
     });
     const { attachFile } = await import('../src/core/operations/attach.js');
 
@@ -346,7 +349,7 @@ describe('attachFile', () => {
 
   it('returns alreadyLinked:true when file is already linked', async () => {
     await seedIndex({
-      'already-linked': makeThread({ linked_files: ['/tmp/test/linked.ts'] }),
+      'already-linked': makeThread({ linked_files: [p('/tmp/test/linked.ts')] }),
     });
     const { attachFile } = await import('../src/core/operations/attach.js');
 
@@ -357,14 +360,14 @@ describe('attachFile', () => {
 
   it('does not duplicate a file that is already linked', async () => {
     await seedIndex({
-      'no-dup': makeThread({ linked_files: ['/tmp/test/once.ts'] }),
+      'no-dup': makeThread({ linked_files: [p('/tmp/test/once.ts')] }),
     });
     const { attachFile } = await import('../src/core/operations/attach.js');
     const { loadIndex } = await import('../src/core/storage.js');
 
     attachFile({ threadId: 'no-dup', filePath: '/tmp/test/once.ts' });
     const index = loadIndex();
-    const occurrences = index['no-dup'].linked_files.filter((f) => f === '/tmp/test/once.ts');
+    const occurrences = index['no-dup'].linked_files.filter((f) => f === p('/tmp/test/once.ts'));
 
     expect(occurrences).toHaveLength(1);
   });
@@ -376,7 +379,7 @@ describe('attachFile', () => {
     const now = new Date().toISOString();
     savePending({
       tracked: [
-        { path: '/tmp/test/tracked.ts', first_seen: now, last_modified: now, count: 1 },
+        { path: p('/tmp/test/tracked.ts'), first_seen: now, last_modified: now, count: 1 },
       ],
     });
 
@@ -384,7 +387,7 @@ describe('attachFile', () => {
     attachFile({ threadId: 'pending-thread', filePath: '/tmp/test/tracked.ts' });
 
     const pending = loadPending();
-    const stillTracked = pending.tracked.some((f) => f.path === '/tmp/test/tracked.ts');
+    const stillTracked = pending.tracked.some((f) => f.path === p('/tmp/test/tracked.ts'));
     expect(stillTracked).toBe(false);
   });
 
@@ -404,7 +407,7 @@ describe('attachFile', () => {
 describe('detachFile', () => {
   it('successfully detaches a linked file', async () => {
     await seedIndex({
-      'detach-thread': makeThread({ linked_files: ['/tmp/test/remove-me.ts'] }),
+      'detach-thread': makeThread({ linked_files: [p('/tmp/test/remove-me.ts')] }),
     });
     const { detachFile } = await import('../src/core/operations/attach.js');
 
@@ -415,7 +418,7 @@ describe('detachFile', () => {
 
   it('removes the file from linked_files in storage', async () => {
     await seedIndex({
-      'storage-detach': makeThread({ linked_files: ['/tmp/test/gone.ts'] }),
+      'storage-detach': makeThread({ linked_files: [p('/tmp/test/gone.ts')] }),
     });
     const { detachFile } = await import('../src/core/operations/attach.js');
     const { loadIndex } = await import('../src/core/storage.js');
@@ -423,7 +426,7 @@ describe('detachFile', () => {
     detachFile({ threadId: 'storage-detach', filePath: '/tmp/test/gone.ts' });
     const index = loadIndex();
 
-    expect(index['storage-detach'].linked_files).not.toContain('/tmp/test/gone.ts');
+    expect(index['storage-detach'].linked_files).not.toContain(p('/tmp/test/gone.ts'));
   });
 
   it('returns success:false with THREAD_NOT_FOUND when thread does not exist', async () => {
@@ -451,12 +454,12 @@ describe('detachFile', () => {
 
     const result = detachFile({ threadId: 'msg-thread', filePath: '/tmp/test/stranger.ts' });
 
-    expect(result.message).toContain('/tmp/test/stranger.ts');
+    expect(result.message).toContain(p('/tmp/test/stranger.ts'));
   });
 
   it('leaves other linked files untouched when detaching one', async () => {
     await seedIndex({
-      'multi-file': makeThread({ linked_files: ['/tmp/test/keep.ts', '/tmp/test/remove.ts'] }),
+      'multi-file': makeThread({ linked_files: [p('/tmp/test/keep.ts'), p('/tmp/test/remove.ts')] }),
     });
     const { detachFile } = await import('../src/core/operations/attach.js');
     const { loadIndex } = await import('../src/core/storage.js');
@@ -464,8 +467,8 @@ describe('detachFile', () => {
     detachFile({ threadId: 'multi-file', filePath: '/tmp/test/remove.ts' });
     const index = loadIndex();
 
-    expect(index['multi-file'].linked_files).toContain('/tmp/test/keep.ts');
-    expect(index['multi-file'].linked_files).not.toContain('/tmp/test/remove.ts');
+    expect(index['multi-file'].linked_files).toContain(p('/tmp/test/keep.ts'));
+    expect(index['multi-file'].linked_files).not.toContain(p('/tmp/test/remove.ts'));
   });
 });
 
@@ -498,7 +501,7 @@ describe('explainFile', () => {
 
   it('returns the single thread linked to a file', async () => {
     await seedIndex({
-      'explain-owner': makeThread({ linked_files: ['/tmp/test/owned.ts'] }),
+      'explain-owner': makeThread({ linked_files: [p('/tmp/test/owned.ts')] }),
     });
     const { explainFile } = await import('../src/core/operations/explain.js');
 
@@ -510,8 +513,8 @@ describe('explainFile', () => {
 
   it('returns all threads when multiple threads link to the same file', async () => {
     await seedIndex({
-      'thread-a': makeThread({ linked_files: ['/tmp/test/shared.ts'] }),
-      'thread-b': makeThread({ linked_files: ['/tmp/test/shared.ts'] }),
+      'thread-a': makeThread({ linked_files: [p('/tmp/test/shared.ts')] }),
+      'thread-b': makeThread({ linked_files: [p('/tmp/test/shared.ts')] }),
     });
     const { explainFile } = await import('../src/core/operations/explain.js');
 
@@ -522,8 +525,8 @@ describe('explainFile', () => {
 
   it('includes correct thread ids when multiple threads link to the same file', async () => {
     await seedIndex({
-      'alpha': makeThread({ linked_files: ['/tmp/test/multi-owned.ts'] }),
-      'beta': makeThread({ linked_files: ['/tmp/test/multi-owned.ts'] }),
+      'alpha': makeThread({ linked_files: [p('/tmp/test/multi-owned.ts')] }),
+      'beta': makeThread({ linked_files: [p('/tmp/test/multi-owned.ts')] }),
     });
     const { explainFile } = await import('../src/core/operations/explain.js');
 
@@ -535,7 +538,7 @@ describe('explainFile', () => {
 
   it('includes thread summary in the result', async () => {
     await seedIndex({
-      'summary-thread': makeThread({ summary: 'Authentication system', linked_files: ['/tmp/test/auth.ts'] }),
+      'summary-thread': makeThread({ summary: 'Authentication system', linked_files: [p('/tmp/test/auth.ts')] }),
     });
     const { explainFile } = await import('../src/core/operations/explain.js');
 
@@ -547,7 +550,7 @@ describe('explainFile', () => {
   it('includes the snippets belonging to the matched thread', async () => {
     const snippet = { content: 'Used JWT for stateless auth', source: 'manual', timestamp: new Date().toISOString() };
     await seedIndex({
-      'snippet-explain': makeThread({ snippets: [snippet], linked_files: ['/tmp/test/jwt.ts'] }),
+      'snippet-explain': makeThread({ snippets: [snippet], linked_files: [p('/tmp/test/jwt.ts')] }),
     });
     const { explainFile } = await import('../src/core/operations/explain.js');
 
@@ -562,7 +565,7 @@ describe('explainFile', () => {
 
     const result = explainFile('/tmp/test/check-path.ts');
 
-    expect(result.data?.filePath).toBe('/tmp/test/check-path.ts');
+    expect(result.data?.filePath).toBe(p('/tmp/test/check-path.ts'));
   });
 });
 
@@ -666,13 +669,13 @@ describe('showThread', () => {
 
   it('returns linked_files in the thread data', async () => {
     await seedIndex({
-      'files-show': makeThread({ linked_files: ['/tmp/test/app.ts', '/tmp/test/db.ts'] }),
+      'files-show': makeThread({ linked_files: [p('/tmp/test/app.ts'), p('/tmp/test/db.ts')] }),
     });
     const { showThread } = await import('../src/core/operations/show.js');
 
     const result = showThread('files-show');
 
-    expect(result.data?.thread.linked_files).toEqual(['/tmp/test/app.ts', '/tmp/test/db.ts']);
+    expect(result.data?.thread.linked_files).toEqual([p('/tmp/test/app.ts'), p('/tmp/test/db.ts')]);
   });
 });
 
