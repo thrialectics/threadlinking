@@ -1,13 +1,16 @@
 {
-  "name": "threadlinking-local",
+  "name": "threadlinking",
   "owner": {
     "name": "Marianne"
   },
   "plugins": [
     {
       "name": "threadlinking",
-      "source": "..",
-      "version": "2.0.0",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/thrialectics/threadlinking.git"
+      },
+      "version": "3.0.0",
       "description": "Preserve decision-making context across sessions by linking files to the decisions behind them"
     }
   ]

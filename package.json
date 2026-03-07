@@ -6,6 +6,8 @@
   "files": [
     "dist",
     "bin",
+    "commands",
+    "skills",
     ".claude-plugin",
     ".mcp.json",
     "LICENSE",

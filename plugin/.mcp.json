@@ -1,7 +1,0 @@
-{
-  "threadlinking": {
-    "command": "npx",
-    "args": ["threadlinking-mcp"],
-    "description": "Preserve decision-making context across sessions"
-  }
-}

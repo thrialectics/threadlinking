@@ -309,12 +309,16 @@ function printStatus(status: SetupStatus): void {
   console.log(`  CLAUDE.md:          ${status.claudeMdPresent ? '\u2713 Present' : '\u2717 Not present'}`);
   console.log(`  Ignore file:        ${status.ignoreFilePresent ? '\u2713 Present' : '\u2717 Not present'}`);
 
+  console.log('');
   if (!status.settingsJsonValid && existsSync(SETTINGS_PATH)) {
     console.log(`  settings.json:      \u2717 Invalid JSON`);
   }
   if (!status.mcpJsonValid && existsSync(MCP_JSON_PATH)) {
     console.log(`  mcp.json:           \u2717 Invalid JSON`);
   }
+  console.log('  For slash commands (/save-context, /find-context, etc.):');
+  console.log('    /plugin marketplace add thrialectics/threadlinking');
+  console.log('    /plugin install threadlinking');
   console.log('');
 }
 
@@ -515,6 +519,10 @@ export const initCommand = new Command('init')
 
     // Done
     console.log('Done! Threadlinking is fully configured.\n');
+    console.log('One more thing — to get slash commands like /save-context,');
+    console.log('/find-context, and /thread-review, install the plugin in Claude Code:\n');
+    console.log('  /plugin marketplace add thrialectics/threadlinking');
+    console.log('  /plugin install threadlinking\n');
     console.log('Start a new Claude Code session to begin.');
     console.log('Tip: Run `threadlinking list` to see your threads.\n');
   });
