@@ -3,7 +3,7 @@
 
 import ignore, { type Ignore } from 'ignore';
 import { readFileSync, existsSync, statSync } from 'fs';
-import { relative, join } from 'path';
+import { relative, join, isAbsolute, resolve } from 'path';
 import { homedir } from 'os';
 import { detectProjectRoot } from './utils.js';
 
@@ -158,12 +158,24 @@ export function isIgnored(absolutePath: string): boolean {
   // The `ignore` package works with relative paths
   // Try project root first, then home dir as fallback
   const projectRoot = detectProjectRoot();
+  const resolvedAbsolutePath = resolve(absolutePath);
   let relativePath: string;
 
-  if (projectRoot && absolutePath.startsWith(projectRoot)) {
-    relativePath = relative(projectRoot, absolutePath);
+  if (projectRoot) {
+    const resolvedProjectRoot = resolve(projectRoot);
+    const fromProjectRoot = relative(resolvedProjectRoot, resolvedAbsolutePath);
+
+    // Path is inside project root only if it does not traverse up or become absolute.
+    if (
+      fromProjectRoot === '.' ||
+      (!fromProjectRoot.startsWith('..') && !isAbsolute(fromProjectRoot))
+    ) {
+      relativePath = fromProjectRoot;
+    } else {
+      relativePath = relative(homedir(), resolvedAbsolutePath);
+    }
   } else {
-    relativePath = relative(homedir(), absolutePath);
+    relativePath = relative(homedir(), resolvedAbsolutePath);
   }
 
   // Skip empty relative paths (the root itself)
@@ -171,10 +183,18 @@ export function isIgnored(absolutePath: string): boolean {
     return false;
   }
 
-  // `ignore` expects POSIX-style separators; Windows uses `\`.
-  const normalizedPath = relativePath.replace(/\\/g, '/');
+  // `ignore` expects relative POSIX-style paths.
+  // On Windows, cross-drive `path.relative()` can yield absolute-looking paths
+  // like `D:\...`, so normalize and strip drive/leading slash prefixes.
+  const normalizedPath = relativePath
+    .replace(/\\/g, '/')
+    .replace(/^[A-Za-z]:\//, '')
+    .replace(/^\/+/, '');
 
   try {
+    if (!normalizedPath || normalizedPath === '.') {
+      return false;
+    }
     return ig.ignores(normalizedPath);
   } catch {
     return false;
