@@ -1,6 +1,6 @@
 {
   "name": "threadlinking",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Preserve the decisions behind your code",
   "type": "module",
   "files": [
