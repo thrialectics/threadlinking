@@ -171,8 +171,11 @@ export function isIgnored(absolutePath: string): boolean {
     return false;
   }
 
+  // `ignore` expects POSIX-style separators; Windows uses `\`.
+  const normalizedPath = relativePath.replace(/\\/g, '/');
+
   try {
-    return ig.ignores(relativePath);
+    return ig.ignores(normalizedPath);
   } catch {
     return false;
   }

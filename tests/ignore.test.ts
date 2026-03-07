@@ -170,4 +170,10 @@ describe('isIgnored - edge cases', () => {
     // Should not crash on arbitrary absolute paths
     expect(() => isIgnored('/tmp/some/random/file.ts')).not.toThrow();
   });
+
+  it('should handle Windows-style path separators', () => {
+    if (process.platform !== 'win32') return;
+    const cwd = process.cwd().replace(/\//g, '\\');
+    expect(isIgnored(`${cwd}\\node_modules\\foo\\index.js`)).toBe(true);
+  });
 });
