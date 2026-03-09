@@ -17,6 +17,9 @@ export const reindexCommand = new Command('reindex')
           console.log(JSON.stringify({ error: result.message }, null, 2));
         } else {
           console.error(`Error: ${result.message}`);
+          if (result.message?.includes('No threads') || result.message?.includes('No content')) {
+            console.error('Tip: Create some snippets first with `threadlinking snippet <thread> "context"`');
+          }
         }
         process.exit(1);
       }

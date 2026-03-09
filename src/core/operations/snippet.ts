@@ -53,6 +53,7 @@ export async function addSnippet(input: SnippetInput): Promise<OperationResult<S
 
     let createdNew = false;
     let snippetCount = 0;
+    let duplicateFound = false;
 
     if (threadExists) {
       // Update existing thread with per-thread locking
@@ -60,11 +61,34 @@ export async function addSnippet(input: SnippetInput): Promise<OperationResult<S
         if (!thread.snippets) {
           thread.snippets = [];
         }
+
+        // Check last 10 snippets for duplicate content
+        const recentSnippets = thread.snippets.slice(-10);
+        const trimmedContent = snippet.content.trim();
+        if (recentSnippets.some((s) => s.content.trim() === trimmedContent)) {
+          duplicateFound = true;
+          snippetCount = thread.snippets.length;
+          return thread; // Return unmodified
+        }
+
         thread.snippets.push(snippet);
         thread.date_modified = new Date().toISOString();
         snippetCount = thread.snippets.length;
         return thread;
       });
+
+      if (duplicateFound) {
+        return {
+          success: true,
+          message: 'Duplicate snippet detected — this content matches a recent snippet. Not added.',
+          data: {
+            threadId: validatedId,
+            snippetIndex: -1,
+            created: false,
+            snippetCount,
+          },
+        };
+      }
     } else {
       // Auto-create thread
       let summary: string;

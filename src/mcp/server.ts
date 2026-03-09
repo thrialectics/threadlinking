@@ -253,6 +253,14 @@ Proactively save context when:
         });
       }
 
+      if (thread.related?.length) {
+        parts.push(`## Related Threads`);
+        thread.related.forEach((r) => {
+          parts.push(`- ${r}`);
+        });
+        parts.push('');
+      }
+
       if (thread.linked_files?.length) {
         parts.push(`## Linked Files (${thread.linked_files.length})`);
         thread.linked_files.forEach((f) => {

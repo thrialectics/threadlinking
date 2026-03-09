@@ -10,6 +10,9 @@ export const detachCommand = new Command('detach')
 
     if (!result.success) {
       console.error(`Error: ${result.message}`);
+      if (result.message?.includes('not found')) {
+        console.error('Tip: Run `threadlinking list` to see available threads.');
+      }
       process.exitCode = 1;
       return;
     }

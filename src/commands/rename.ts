@@ -15,12 +15,14 @@ export const renameCommand = new Command('rename')
 
       if (!meta.threads[validatedOld]) {
         console.error(`Thread ID '${validatedOld}' not found.`);
+        console.error('Tip: Run `threadlinking list` to see available threads.');
         process.exitCode = 1;
         return;
       }
 
       if (meta.threads[validatedNew]) {
         console.error(`Target ID '${validatedNew}' already exists.`);
+        console.error('Tip: Use `threadlinking show <thread>` to view it, or choose a different name.');
         process.exitCode = 1;
         return;
       }
@@ -29,6 +31,7 @@ export const renameCommand = new Command('rename')
       const thread = loadThread(validatedOld);
       if (!thread) {
         console.error(`Thread ID '${validatedOld}' not found.`);
+        console.error('Tip: Run `threadlinking list` to see available threads.');
         process.exitCode = 1;
         return;
       }

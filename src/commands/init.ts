@@ -511,7 +511,8 @@ export const initCommand = new Command('init')
       }
       if (shouldInstall) {
         writeFileSync(GLOBAL_IGNORE_PATH, getDefaultIgnoreContent(), 'utf-8');
-        console.log('      \u2713 Ignore file created\n');
+        console.log('      \u2713 Ignore file created');
+        console.log('      Tip: Run `threadlinking prune` to remove ignored files from pending.\n');
       } else {
         console.log('      Skipped\n');
       }

@@ -14,6 +14,7 @@ export const deleteCommand = new Command('delete')
       const meta = loadMetaIndex();
       if (!meta.threads[validatedId]) {
         console.error(`Thread ID '${validatedId}' not found.`);
+        console.error('Tip: Run `threadlinking list` to see available threads.');
         process.exitCode = 1;
         return;
       }

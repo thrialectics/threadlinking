@@ -15,6 +15,9 @@ export const createCommand = new Command('create')
 
     if (!result.success) {
       console.error(`Error: ${result.message}`);
+      if (result.message?.includes('already exists')) {
+        console.error('Tip: Use `threadlinking show <thread>` to view it, or choose a different name.');
+      }
       process.exitCode = 1;
       return;
     }

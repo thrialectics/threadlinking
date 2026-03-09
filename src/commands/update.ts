@@ -17,6 +17,7 @@ export const updateCommand = new Command('update')
     try {
       if (!options.summary && options.chat_url === undefined) {
         console.error('Nothing to update. Provide --summary and/or --chat_url');
+        console.error('Example: threadlinking update mythread --summary "New description"');
         process.exitCode = 1;
         return;
       }
@@ -27,6 +28,7 @@ export const updateCommand = new Command('update')
       const meta = loadMetaIndex();
       if (!meta.threads[validatedId]) {
         console.error(`Thread ID '${validatedId}' not found.`);
+        console.error('Tip: Run `threadlinking list` to see available threads.');
         process.exitCode = 1;
         return;
       }

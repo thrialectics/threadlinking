@@ -19,3 +19,6 @@ export { exportThread } from './export.js';
 export type { SemanticSearchResult } from './semantic.js';
 export type { AnalyticsResult } from './analytics.js';
 export type { ExportFormat, ExportResult } from './export.js';
+
+export { relateThreads, unrelateThreads } from './relate.js';
+export type { RelateResult } from './relate.js';

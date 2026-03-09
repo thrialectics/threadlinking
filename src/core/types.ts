@@ -16,6 +16,7 @@ export interface Thread {
   chat_url?: string;
   date_created: string;
   date_modified?: string;
+  related?: string[];
 }
 
 export type ThreadIndex = Record<string, Thread>;

@@ -1,16 +1,12 @@
 # Threadlinking
 
-> Preserve the decisions behind your code
+> Git tracks what changed. Threadlinking tracks **why**.
 
-Threadlinking is a Claude Code native tool for preserving decision-making context alongside the files you create.
+You built something three weeks ago. Now you're staring at it, trying to remember why you made that choice. The commit message says "add auth module" -- but why JWT? Why not sessions? What constraint drove that decision?
 
-Your team is working on a project. Files get created, design decisions are made, problems get solved. A week later, someone's looking at the code wondering:
+Threadlinking captures decision rationale alongside your code. It works natively with Claude Code -- Claude detects decisions as you make them, saves the reasoning, and surfaces it when you (or a teammate) come back later.
 
-> "Why was it built this way? What were we thinking?"
-
-Threadlinking solves this by capturing decision rationale for your files and code, so you can trace your "why" across sessions, teammates, and repos.
-
-A thread is a container for an **idea or project**, not just a feature or task. One thread might span months of work, dozens of files, and hundreds of snippets across multiple repos. When someone starts a new session next week, threadlinking connects it back to the earlier decisions, preserving context across the gaps.
+A **thread** is a container for an idea or project, not a task. One thread spans months of work, dozens of files, and hundreds of context snippets. When you start a new session weeks later, threadlinking connects it back to the earlier decisions.
 
 ---
 
@@ -20,22 +16,22 @@ Threadlinking ships as a **Claude Code plugin** — when you run `threadlinking 
 
 ### MCP Tools
 
-These are the tools Claude gets when the MCP server is active:
+Threadlinking exposes 12 tools to Claude Code via MCP:
 
-| Tool | What it does |
+| Tool | Description |
 |------|-------------|
-| `threadlinking_snippet` | Save decision context to a thread |
+| `threadlinking_snippet` | Add a context snippet to a thread (auto-creates thread if needed) |
 | `threadlinking_create` | Create a new empty thread |
 | `threadlinking_attach` | Link a file to a thread |
-| `threadlinking_detach` | Unlink a file from a thread |
-| `threadlinking_explain` | Show why a file exists |
-| `threadlinking_show` | View full thread details |
-| `threadlinking_list` | List all threads + pending files |
-| `threadlinking_search` | Keyword search across threads |
-| `threadlinking_semantic_search` | Natural language search by meaning |
-| `threadlinking_analytics` | Usage stats and insights |
-| `threadlinking_export` | Export threads (markdown, JSON, timeline) |
-| `threadlinking_status` | Check available features and version |
+| `threadlinking_detach` | Remove a file link from a thread |
+| `threadlinking_explain` | Show why a file exists — the decisions and reasoning behind it |
+| `threadlinking_show` | View full thread details including all snippets and linked files |
+| `threadlinking_list` | List all threads and pending unlinked files |
+| `threadlinking_search` | Search threads by keyword |
+| `threadlinking_semantic_search` | Search threads by semantic similarity |
+| `threadlinking_analytics` | Get usage analytics and insights |
+| `threadlinking_export` | Export thread(s) in markdown, JSON, or timeline format |
+| `threadlinking_status` | Check available features and index status |
 
 ### Slash Commands
 

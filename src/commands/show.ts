@@ -11,6 +11,9 @@ export const showCommand = new Command('show')
 
     if (!result.success) {
       console.error(`Error: ${result.message}`);
+      if (result.message?.includes('not found')) {
+        console.error('Tip: Run `threadlinking list` to see available threads.');
+      }
       process.exitCode = 1;
       return;
     }
@@ -72,6 +75,13 @@ export const showCommand = new Command('show')
     } else if (filterTag) {
       console.log();
       console.log(`  No snippets with tag: ${filterTag}`);
+    }
+
+    // Show related threads
+    const related = thread.related || [];
+    if (related.length > 0) {
+      console.log();
+      console.log(`  Related threads: ${related.join(', ')}`);
     }
 
     // Show linked files

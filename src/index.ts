@@ -21,6 +21,8 @@ import { statusCommand } from './commands/status.js';
 import { contextCommand } from './commands/context.js';
 import { reindexCommand } from './commands/reindex.js';
 import { semanticSearchCommand } from './commands/semantic-search.js';
+import { relateCommand } from './commands/relate.js';
+import { unrelateCommand } from './commands/unrelate.js';
 
 const program = new Command();
 
@@ -54,6 +56,10 @@ program.addCommand(trackCommand);
 // Info commands
 program.addCommand(statusCommand);
 program.addCommand(contextCommand);
+
+// Relationship commands
+program.addCommand(relateCommand);
+program.addCommand(unrelateCommand);
 
 // Advanced commands
 program.addCommand(reindexCommand);

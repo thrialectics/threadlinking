@@ -10,7 +10,7 @@
         "source": "url",
         "url": "https://github.com/thrialectics/threadlinking.git"
       },
-      "version": "3.0.0",
+      "version": "3.0.1",
       "description": "Preserve decision-making context across sessions by linking files to the decisions behind them"
     }
   ]
