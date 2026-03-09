@@ -16,7 +16,7 @@ Threadlinking ships as a **Claude Code plugin** — when you run `threadlinking 
 
 ### MCP Tools
 
-Threadlinking exposes 12 tools to Claude Code via MCP:
+Threadlinking exposes 13 tools to Claude Code via MCP:
 
 | Tool | Description |
 |------|-------------|
@@ -31,6 +31,7 @@ Threadlinking exposes 12 tools to Claude Code via MCP:
 | `threadlinking_semantic_search` | Search threads by semantic similarity |
 | `threadlinking_analytics` | Get usage analytics and insights |
 | `threadlinking_export` | Export thread(s) in markdown, JSON, or timeline format |
+| `threadlinking_reindex` | Rebuild the semantic search index |
 | `threadlinking_status` | Check available features and index status |
 
 ### Slash Commands

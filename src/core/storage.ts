@@ -43,6 +43,8 @@ export interface ThreadMeta {
   summary: string;
   date_created: string;
   date_modified?: string;
+  snippetCount?: number;
+  fileCount?: number;
 }
 
 export interface MetaIndex {
@@ -119,6 +121,8 @@ function extractMeta(thread: Thread): ThreadMeta {
     summary: thread.summary,
     date_created: thread.date_created,
     date_modified: thread.date_modified,
+    snippetCount: (thread.snippets || []).length,
+    fileCount: (thread.linked_files || []).length,
   };
 }
 
@@ -274,6 +278,12 @@ export function saveThread(id: string, thread: Thread): void {
 /**
  * Atomically update a single thread with per-thread locking.
  * Much faster than updateIndex() for single-thread operations.
+ *
+ * Lock ordering: acquires per-thread lock, releases it, THEN acquires meta lock.
+ * This prevents deadlock — no function ever holds two locks simultaneously.
+ * Trade-off: brief window where thread file is updated but meta index is stale.
+ * This is acceptable because meta is advisory (listing/display only) and
+ * the thread file is always the source of truth.
  */
 export function updateThread(id: string, fn: (thread: Thread) => Thread): Thread {
   ensureMigrated();
@@ -282,6 +292,8 @@ export function updateThread(id: string, fn: (thread: Thread) => Thread): Thread
   const threadPath = safeThreadPath(id);
   ensureFileExists(threadPath, '{}');
 
+  // Phase 1: Acquire thread lock, mutate, write, release
+  let updated: Thread;
   let release: (() => void) | null = null;
   try {
     release = lockSync(threadPath, LOCK_OPTIONS);
@@ -293,23 +305,23 @@ export function updateThread(id: string, fn: (thread: Thread) => Thread): Thread
     }
 
     // Apply mutation
-    const updated = fn(thread);
+    updated = fn(thread);
 
-    // Save thread file atomically (bypass saveThread to avoid double-locking meta)
+    // Save thread file atomically
     atomicWrite(threadPath, JSON.stringify(updated, null, 2));
-
-    // Update meta index
-    updateMetaIndex((meta) => {
-      meta.threads[id] = extractMeta(updated);
-      return meta;
-    });
-
-    return updated;
   } finally {
     if (release) {
       try { unlockSync(threadPath); } catch { /* ignore */ }
     }
   }
+
+  // Phase 2: Update meta index (outside thread lock — no nested locks)
+  updateMetaIndex((meta) => {
+    meta.threads[id] = extractMeta(updated);
+    return meta;
+  });
+
+  return updated;
 }
 
 /**

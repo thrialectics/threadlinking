@@ -1,7 +1,7 @@
 // Semantic search operation
 // Uses all-MiniLM-L6-v2 embeddings via @xenova/transformers (pure Node.js)
 
-import { loadIndex, getIndexPath } from '../storage.js';
+import { loadMetaIndex, loadThread, loadIndex, getIndexPath } from '../storage.js';
 import type { OperationResult, Thread } from '../types.js';
 import { getEmbedder, stopEmbedder } from '../../embeddings/embedder.js';
 import {
@@ -73,7 +73,7 @@ export async function semanticSearch(
     const searchResults = await semanticIndex.search(queryVector, limit * 3);
 
     // Group results by thread and aggregate scores
-    const threadIndex = loadIndex();
+    const meta = loadMetaIndex();
     const threadScores = new Map<
       string,
       { score: number; matchedSnippets: number[] }
@@ -100,20 +100,24 @@ export async function semanticSearch(
       threadScores.set(threadId, existing);
     }
 
-    // Build final results
+    // Build final results — only load individual thread files for matched threads
     const results: SemanticSearchResult['results'] = [];
 
     for (const [threadId, data] of threadScores) {
-      const thread = threadIndex[threadId];
-      if (thread) {
-        results.push({
-          id: threadId,
-          thread,
-          score: data.score,
-          matchedSnippets: [...new Set(data.matchedSnippets)].sort(
-            (a, b) => a - b
-          ),
-        });
+      const threadMeta = meta.threads[threadId];
+      if (threadMeta) {
+        // Load only the matched thread file instead of all threads
+        const thread = loadThread(threadId);
+        if (thread) {
+          results.push({
+            id: threadId,
+            thread,
+            score: data.score,
+            matchedSnippets: [...new Set(data.matchedSnippets)].sort(
+              (a, b) => a - b
+            ),
+          });
+        }
       }
     }
 

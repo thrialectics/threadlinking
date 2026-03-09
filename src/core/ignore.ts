@@ -55,6 +55,9 @@ const DEFAULT_IGNORE_CONTENT = `# Threadlinking ignore patterns (gitignore synta
 **/.venv/**
 **/venv/**
 **/__pycache__/**
+
+# Threadlinking debug log
+debug.log
 `;
 
 interface CacheEntry {

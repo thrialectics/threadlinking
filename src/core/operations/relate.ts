@@ -42,27 +42,32 @@ export function relateThreads(threadId: string, relatedId: string): OperationRes
       };
     }
 
-    // Add relatedId to threadId's related[]
+    // Deterministic lock ordering: always update alphabetically-first thread first.
+    // Prevents deadlock if concurrent calls do relate(A,B) and relate(B,A).
+    const [firstId, secondId] = [validatedId, validatedRelatedId].sort();
+
     let alreadyRelated = false;
 
-    updateThread(validatedId, (thread) => {
+    updateThread(firstId, (thread) => {
       const related = thread.related || [];
-      if (related.includes(validatedRelatedId)) {
+      const otherId = firstId === validatedId ? validatedRelatedId : validatedId;
+      if (related.includes(otherId)) {
         alreadyRelated = true;
         return thread;
       }
-      related.push(validatedRelatedId);
+      related.push(otherId);
       thread.related = related;
       thread.date_modified = new Date().toISOString();
       return thread;
     });
 
-    // Add threadId to relatedId's related[] (bidirectional)
+    // Add to the other side (bidirectional)
     if (!alreadyRelated) {
-      updateThread(validatedRelatedId, (thread) => {
+      updateThread(secondId, (thread) => {
         const related = thread.related || [];
-        if (!related.includes(validatedId)) {
-          related.push(validatedId);
+        const otherId = secondId === validatedRelatedId ? validatedId : validatedRelatedId;
+        if (!related.includes(otherId)) {
+          related.push(otherId);
           thread.related = related;
           thread.date_modified = new Date().toISOString();
         }
@@ -122,24 +127,28 @@ export function unrelateThreads(threadId: string, relatedId: string): OperationR
       };
     }
 
-    // Check if they are actually related
+    // Deterministic lock ordering: alphabetically-first thread first
+    const [firstId, secondId] = [validatedId, validatedRelatedId].sort();
+
     let wasRelated = false;
 
-    updateThread(validatedId, (thread) => {
+    updateThread(firstId, (thread) => {
       const related = thread.related || [];
-      if (related.includes(validatedRelatedId)) {
+      const otherId = firstId === validatedId ? validatedRelatedId : validatedId;
+      if (related.includes(otherId)) {
         wasRelated = true;
-        thread.related = related.filter((r) => r !== validatedRelatedId);
+        thread.related = related.filter((r) => r !== otherId);
         thread.date_modified = new Date().toISOString();
       }
       return thread;
     });
 
     // Remove from the other side too
-    updateThread(validatedRelatedId, (thread) => {
+    updateThread(secondId, (thread) => {
       const related = thread.related || [];
-      if (related.includes(validatedId)) {
-        thread.related = related.filter((r) => r !== validatedId);
+      const otherId = secondId === validatedRelatedId ? validatedId : validatedRelatedId;
+      if (related.includes(otherId)) {
+        thread.related = related.filter((r) => r !== otherId);
         thread.date_modified = new Date().toISOString();
       }
       return thread;

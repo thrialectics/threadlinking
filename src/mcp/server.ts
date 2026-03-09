@@ -15,6 +15,7 @@ import {
   searchThreads,
   // Advanced operations
   semanticSearch,
+  rebuildSemanticIndex,
   getAnalytics,
   exportThread,
 } from '../core/index.js';
@@ -503,6 +504,20 @@ Proactively save context when:
             text: `## Export (${args.format})\n\n\`\`\`${args.format === 'json' ? 'json' : ''}\n${result.data!.content}\n\`\`\``,
           },
         ],
+      };
+    }
+  );
+
+  // threadlinking_reindex - Rebuild semantic index
+  server.tool(
+    'threadlinking_reindex',
+    'Rebuild the semantic search index. Run after adding many snippets, or if semantic search returns stale results.',
+    {},
+    async () => {
+      const result = await rebuildSemanticIndex();
+      return {
+        content: [{ type: 'text', text: result.message }],
+        isError: !result.success,
       };
     }
   );

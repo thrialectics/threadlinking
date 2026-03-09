@@ -13,7 +13,7 @@ export { searchThreads } from './search.js';
 export { pruneIgnored } from './prune.js';
 export type { PruneResult } from './prune.js';
 
-export { semanticSearch } from './semantic.js';
+export { semanticSearch, rebuildSemanticIndex } from './semantic.js';
 export { getAnalytics } from './analytics.js';
 export { exportThread } from './export.js';
 export type { SemanticSearchResult } from './semantic.js';

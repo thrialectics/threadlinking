@@ -8,13 +8,8 @@ import type { OperationResult, ListResult, ListOptions } from '../types.js';
 
 export function listThreads(options?: ListOptions): OperationResult<ListResult> {
   try {
-    // Use meta index for thread listing (fast - no need to read all thread files)
+    // Use meta index for thread listing (fast - reads one small file)
     const meta = loadMetaIndex();
-
-    // For snippet/file counts, we need full thread data
-    // Only load full data if we need counts
-    const needCounts = true; // list always shows counts
-    const fullIndex = needCounts ? loadAllThreads() : {};
 
     const now = new Date();
 
@@ -40,17 +35,15 @@ export function listThreads(options?: ListOptions): OperationResult<ListResult> 
       return true;
     });
 
-    // Format thread data
-    const threads = entries.map(([id, threadMeta]) => {
-      const fullThread = fullIndex[id];
-      return {
-        id,
-        summary: threadMeta.summary || '',
-        snippetCount: fullThread ? (fullThread.snippets || []).length : 0,
-        fileCount: fullThread ? (fullThread.linked_files || []).length : 0,
-        dateModified: threadMeta.date_modified || threadMeta.date_created,
-      };
-    });
+    // Format thread data using meta index counts
+    // Counts are available in meta since v3.0.2; fall back to 0 for older entries
+    const threads = entries.map(([id, threadMeta]) => ({
+      id,
+      summary: threadMeta.summary || '',
+      snippetCount: threadMeta.snippetCount ?? 0,
+      fileCount: threadMeta.fileCount ?? 0,
+      dateModified: threadMeta.date_modified || threadMeta.date_created,
+    }));
 
     // Get pending files
     let pending: ListResult['pending'] = [];
@@ -59,9 +52,10 @@ export function listThreads(options?: ListOptions): OperationResult<ListResult> 
       const pendingState = loadPending();
 
       // Filter out files already linked to any thread
-      const allLinkedFiles = new Set(
-        Object.values(fullIndex).flatMap((t) => t.linked_files || [])
-      );
+      // This still requires loading all threads — but only when pending files exist
+      const allLinkedFiles = pendingState.tracked.length > 0
+        ? new Set(Object.values(loadAllThreads()).flatMap((t) => t.linked_files || []))
+        : new Set<string>();
 
       const untracked = pendingState.tracked
         .filter((f) => !allLinkedFiles.has(f.path))

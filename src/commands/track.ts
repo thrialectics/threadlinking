@@ -1,5 +1,7 @@
 import { Command } from 'commander';
-import { existsSync } from 'fs';
+import { existsSync, appendFileSync } from 'fs';
+import { join } from 'path';
+import { homedir } from 'os';
 import { loadIndex, updatePending, resolvePath } from '../core/index.js';
 import { isIgnored } from '../core/ignore.js';
 
@@ -59,7 +61,14 @@ export const trackCommand = new Command('track')
       if (!options.quiet && wasTracked) {
         console.log(`Tracked: ${resolvedPath}`);
       }
-    } catch {
-      // Fail silently - this runs on every file write
+    } catch (error) {
+      try {
+        const logPath = join(homedir(), '.threadlinking', 'debug.log');
+        const timestamp = new Date().toISOString();
+        const message = error instanceof Error ? error.message : String(error);
+        appendFileSync(logPath, `[${timestamp}] track error: ${message}\n`);
+      } catch {
+        // If we can't even log, truly swallow
+      }
     }
   });
