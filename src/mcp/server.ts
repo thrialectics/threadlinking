@@ -18,6 +18,7 @@ import {
   rebuildSemanticIndex,
   getAnalytics,
   exportThread,
+  parseTags,
 } from '../core/index.js';
 import { VERSION } from '../version.js';
 
@@ -61,7 +62,7 @@ Proactively save context when:
       source: z.string().optional().describe('Source identifier (defaults to claude-code)'),
     },
     async (args) => {
-      const tags = args.tags?.split(',').map((t) => t.trim()).filter((t) => t);
+      const tags = args.tags ? parseTags(args.tags) : undefined;
       const result = await addSnippet({
         threadId: args.thread_id,
         content: args.content,
