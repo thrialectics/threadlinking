@@ -1,7 +1,7 @@
 // Semantic search operation
 // Uses all-MiniLM-L6-v2 embeddings via @xenova/transformers (pure Node.js)
 
-import { loadMetaIndex, loadThread, loadIndex, getIndexPath } from '../storage.js';
+import { loadMetaIndex, loadThread, loadIndex, getMetaIndexPath } from '../storage.js';
 import type { OperationResult, Thread } from '../types.js';
 import { getEmbedder, stopEmbedder } from '../../embeddings/embedder.js';
 import {
@@ -49,7 +49,7 @@ export async function semanticSearch(
 
     // Check if index is stale and reload if needed
     let staleWarning: string | undefined;
-    const threadIndexPath = getIndexPath();
+    const threadIndexPath = getMetaIndexPath();
     if (fs.existsSync(threadIndexPath)) {
       const stats = fs.statSync(threadIndexPath);
       if (semanticIndex.isStale(stats.mtime)) {

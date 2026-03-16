@@ -255,6 +255,6 @@ export function resetSemanticIndex(): void {
   defaultIndex = null;
 }
 
-export function getIndexPath(): string {
+export function getSemanticIndexPath(): string {
   return INDEX_DIR;
 }

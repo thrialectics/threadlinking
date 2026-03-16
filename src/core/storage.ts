@@ -430,7 +430,7 @@ export function updateIndex(updateFn: (index: ThreadIndex) => ThreadIndex): Thre
 
 // ===== Path Getters =====
 
-export function getIndexPath(): string {
+export function getMetaIndexPath(): string {
   return META_INDEX_PATH;
 }
 
