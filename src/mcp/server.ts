@@ -413,7 +413,7 @@ Proactively save context when:
       parts.push('## Available Features');
       parts.push('');
       parts.push('**Core:**');
-      parts.push('- snippet, attach, detach, explain, show, list, search, create');
+      parts.push('- snippet, attach, detach, explain, show, list, search, create, delete');
       parts.push('');
       parts.push('**Advanced:**');
       parts.push('- semantic_search (natural language search)');
