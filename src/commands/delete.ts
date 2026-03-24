@@ -1,6 +1,5 @@
 import { Command } from 'commander';
-import { deleteThreadFile, loadMetaIndex, validateTag, prompt } from '../core/index.js';
-import { getSemanticIndex } from '../embeddings/index.js';
+import { validateTag, prompt, deleteThread } from '../core/index.js';
 
 export const deleteCommand = new Command('delete')
   .description('Delete a thread')
@@ -9,15 +8,6 @@ export const deleteCommand = new Command('delete')
   .action(async (threadId: string, options) => {
     try {
       const validatedId = validateTag(threadId);
-
-      // Check existence via meta index
-      const meta = loadMetaIndex();
-      if (!meta.threads[validatedId]) {
-        console.error(`Thread ID '${validatedId}' not found.`);
-        console.error('Tip: Run `threadlinking list` to see available threads.');
-        process.exitCode = 1;
-        return;
-      }
 
       if (!options.yes) {
         const answer = await prompt(
@@ -29,17 +19,18 @@ export const deleteCommand = new Command('delete')
         }
       }
 
-      deleteThreadFile(validatedId);
+      const result = await deleteThread({ threadId: validatedId });
 
-      // Clean up semantic index embeddings for the deleted thread
-      try {
-        const semanticIndex = await getSemanticIndex();
-        await semanticIndex.deleteThread(validatedId);
-      } catch {
-        // Non-fatal: semantic index may not exist
+      if (!result.success) {
+        console.error(result.message);
+        if (result.error === 'THREAD_NOT_FOUND') {
+          console.error('Tip: Run `threadlinking list` to see available threads.');
+        }
+        process.exitCode = 1;
+        return;
       }
 
-      console.log(`Deleted thread '${validatedId}'.`);
+      console.log(result.message);
     } catch (error) {
       console.error(`Error: ${error instanceof Error ? error.message : error}`);
       process.exitCode = 1;
