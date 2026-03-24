@@ -8,7 +8,7 @@ export * from './types.js';
 export {
   loadIndex,
   saveIndex,
-  getIndexPath,
+  getMetaIndexPath,
   getBaseDir,
   getThreadsDir,
   loadPending,

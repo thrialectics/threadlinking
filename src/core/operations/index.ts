@@ -3,6 +3,8 @@
 
 export { addSnippet } from './snippet.js';
 export { createThread } from './create.js';
+export { deleteThread } from './delete.js';
+export type { DeleteResult } from './delete.js';
 export { attachFile, detachFile } from './attach.js';
 export { explainFile } from './explain.js';
 export { showThread, getThread } from './show.js';
