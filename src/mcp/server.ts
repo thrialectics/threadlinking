@@ -7,6 +7,7 @@ import {
   // Core operations
   addSnippet,
   createThread,
+  deleteThread,
   attachFile,
   detachFile,
   explainFile,
@@ -110,6 +111,40 @@ Proactively save context when:
           },
         ],
         isError: !result.success,
+      };
+    }
+  );
+
+  // threadlinking_delete - Permanently delete a thread
+  server.tool(
+    'threadlinking_delete',
+    'Permanently delete a thread and all its snippets. Also cleans up related-thread references and semantic index entries. This cannot be undone.',
+    {
+      thread_id: z.string().describe('Thread name to delete'),
+    },
+    async (args) => {
+      const result = await deleteThread({ threadId: args.thread_id });
+
+      if (!result.success) {
+        return {
+          content: [{ type: 'text', text: `Error: ${result.message}` }],
+          isError: true,
+        };
+      }
+
+      const d = result.data!;
+      const parts: string[] = [result.message];
+      parts.push(`- ${d.snippetsRemoved} snippet(s) removed`);
+      parts.push(`- ${d.filesUnlinked} file link(s) removed`);
+      if (d.relatedThreadsUpdated.length > 0) {
+        parts.push(`- Updated related threads: ${d.relatedThreadsUpdated.join(', ')}`);
+      }
+      if (d.semanticEntriesRemoved > 0) {
+        parts.push(`- ${d.semanticEntriesRemoved} semantic index entry/entries removed`);
+      }
+
+      return {
+        content: [{ type: 'text', text: parts.join('\n') }],
       };
     }
   );
